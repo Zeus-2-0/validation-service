@@ -1,13 +1,12 @@
 package com.brihaspathee.zeus.message;
 
-import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.*;
 
 /**
  * Created in Intellij IDEA
  * User: Balaji Varadharajan
- * Date: 22, September 2022
- * Time: 10:50 AM
+ * Date: 23, September 2022
+ * Time: 5:47 PM
  * Project: Zeus
  * Package Name: com.brihaspathee.zeus.message
  * To change this template use File | Settings | File and Code Template
@@ -17,15 +16,15 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountValidationMessage {
+public class AccountValidationAcknowledgement {
 
     /**
-     * Unique id for the message
+     * Unique id for the acknowledgement
      */
-    private String validationMessageId;
+    private String ackId;
 
     /**
-     * The account that needs to be validated
+     * The request payload id for which the acknowledgement is sent
      */
-    private AccountDto accountDto;
+    private String requestPayloadId;
 }

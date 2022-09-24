@@ -20,10 +20,10 @@ spring:
           json:
             trusted:
               packages: "*"
-      bootstrap-servers: localhost:9092
+      # bootstrap-servers: localhost:9092
 logging:
   file:
-    name: logs/local/membermgmt.log
+    name: logs/local/validation.log
   level:
     org:
       hibernate:

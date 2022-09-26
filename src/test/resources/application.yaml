@@ -1,32 +1,26 @@
-zeus-validation:
-  api:
-    version: 1.0.0
-server:
-  port: 8089
 spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:validationtestdb
+  flyway:
+    enabled: false
   jpa:
-    hibernate:
-      ddl-auto: validate
+    defer-datasource-initialization: true
     properties:
       hibernate:
         show_sql: true
         format_sql: true
   profiles:
-    active: clean, local
-  datasource:
-    url: jdbc:mysql://localhost:3306/validationdb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
-    username: validationapp
-    password: password
-  flyway:
-    user: validationadmin
-    password: password
+    active: test
   kafka:
     # bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      group-id: zeus-validation-consumer-group
+      group-id: zeus-member-mgmt-consumer-group
       enable-auto-commit: true
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -36,14 +30,10 @@ spring:
           json:
             trusted:
               packages: "*"
-      # bootstrap-servers: localhost:9092
 logging:
-  file:
-    name: logs/local/validation.log
   level:
     org:
       hibernate:
         type:
           descriptor:
             sql: trace
-

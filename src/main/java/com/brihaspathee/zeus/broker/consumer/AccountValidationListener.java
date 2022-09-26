@@ -1,5 +1,6 @@
 package com.brihaspathee.zeus.broker.consumer;
 
+import com.brihaspathee.zeus.broker.producer.AccountValidationResultProducer;
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.PayloadTrackerDetail;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
@@ -9,6 +10,7 @@ import com.brihaspathee.zeus.message.AccountValidationRequest;
 import com.brihaspathee.zeus.message.MessageMetadata;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
+import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -53,6 +55,16 @@ public class AccountValidationListener {
     private final PayloadTrackerDetailHelper payloadTrackerDetailHelper;
 
     /**
+     * Validator to validate the account detail received
+     */
+    private final AccountValidator accountValidator;
+
+    /**
+     * Producer to send the validation result to member management service
+     */
+    private final AccountValidationResultProducer accountValidationResultProducer;
+
+    /**
      * kafka consumer to consume the messages
      * @param consumerRecord
      * @return
@@ -87,13 +99,8 @@ public class AccountValidationListener {
                 .build();
         payloadTracker = payloadTrackerHelper.createPayloadTracker(payloadTracker);
 
-        // Perform validations
-        log.info(messagePayload.getPayload().getAccountDto().getAccountNumber());
-        AccountDto accountDto = messagePayload.getPayload().getAccountDto();
-        log.info("Total number of enrollment spans:{}", accountDto.getEnrollmentSpans().size());
-        String[] messageDestinations = {"MEMBER-MGMT-SERVICE"};
-
         // Create the acknowledgment back to member management service
+        String[] messageDestinations = {"MEMBER-MGMT-SERVICE"};
         ZeusMessagePayload<AccountValidationAcknowledgement> ack = ZeusMessagePayload.<AccountValidationAcknowledgement>builder()
                 .messageMetadata(MessageMetadata.builder()
                         .messageDestination(messageDestinations)
@@ -114,6 +121,17 @@ public class AccountValidationListener {
                 .responsePayload(ackAsString)
                 .build();
         payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
+
+        // Perform validations
+        log.info(messagePayload.getPayload().getAccountDto().getAccountNumber());
+        AccountDto accountDto = messagePayload.getPayload().getAccountDto();
+        log.info("Total number of enrollment spans:{}", accountDto.getEnrollmentSpans().size());
+
+        accountValidator
+                .validateAccount(payloadTracker, accountDto)
+                .subscribe(accountValidationResultProducer::sendAccountValidationResult);
+        log.info("After the call to validate the account");
+
         return ack;
     }
 }

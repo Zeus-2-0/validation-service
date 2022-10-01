@@ -3,6 +3,7 @@ package com.brihaspathee.zeus.validator.impl;
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.message.AccountValidationResult;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
+import com.brihaspathee.zeus.validator.interfaces.EnrollmentSpanValidator;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.ArrayList;
 
 /**
  * Created in Intellij IDEA
@@ -24,6 +26,11 @@ import java.time.Duration;
 @Component
 @RequiredArgsConstructor
 public class AccountValidatorImpl implements AccountValidator {
+
+    /**
+     * Enrollment Span validator to validate the enrollment spans of the account
+     */
+    private final EnrollmentSpanValidator enrollmentSpanValidator;
 
     /**
      * The method to validate the account
@@ -41,8 +48,9 @@ public class AccountValidatorImpl implements AccountValidator {
         log.info("Inside the account validator");
         AccountValidationResult accountValidationResult = AccountValidationResult.builder()
                 .accountNumber(accountDto.getAccountNumber())
-                .validationPassed(true)
+                .validationExceptions(new ArrayList<>())
                 .build();
+        accountValidationResult =enrollmentSpanValidator.validateEnrollmentSpans(accountValidationResult, accountDto.getEnrollmentSpans());
         return Mono.just(accountValidationResult).delayElement(Duration.ofSeconds(30));
     }
 }

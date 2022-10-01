@@ -1,6 +1,9 @@
 package com.brihaspathee.zeus.message;
 
+import com.brihaspathee.zeus.exception.ValidationException;
 import lombok.*;
+
+import java.util.List;
 
 /**
  * Created in Intellij IDEA
@@ -29,6 +32,11 @@ public class AccountValidationResult {
     private boolean validationPassed;
 
     /**
+     * Contains the list of validation exceptions
+     */
+    private List<ValidationException> validationExceptions;
+
+    /**
      * toString
      * @return
      */
@@ -37,6 +45,7 @@ public class AccountValidationResult {
         return "AccountValidationResult{" +
                 "accountNumber='" + accountNumber + '\'' +
                 ", validationPassed=" + validationPassed +
+                ", validationExceptions=" + validationExceptions +
                 '}';
     }
 }

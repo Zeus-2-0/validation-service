@@ -1,17 +1,21 @@
 package com.brihaspathee.zeus.validator.impl;
 
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
+import com.brihaspathee.zeus.domain.entity.RuleCategory;
+import com.brihaspathee.zeus.helper.interfaces.RuleCategoryHelper;
 import com.brihaspathee.zeus.message.AccountValidationResult;
+import com.brihaspathee.zeus.validator.interfaces.AccountDetailValidator;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
-import com.brihaspathee.zeus.validator.interfaces.EnrollmentSpanValidator;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created in Intellij IDEA
@@ -28,9 +32,18 @@ import java.util.ArrayList;
 public class AccountValidatorImpl implements AccountValidator {
 
     /**
-     * Enrollment Span validator to validate the enrollment spans of the account
+     * This is a map of all the implementations of the AccountDetailValidator interface
+     * The key is the camel case version of the implentation class name
+     * E.g. if the class name is "DemographicValidator" the key is assigned as
+     * "demographicValidator"
      */
-    private final EnrollmentSpanValidator enrollmentSpanValidator;
+    private final Map<String, AccountDetailValidator> accountDetailValidators;
+
+    /**
+     * Get the rules that are to be executed
+     */
+    private final RuleCategoryHelper ruleCategoryHelper;
+
 
     /**
      * The method to validate the account
@@ -40,17 +53,14 @@ public class AccountValidatorImpl implements AccountValidator {
      */
     @Override
     public Mono<AccountValidationResult> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
-//        try{
-//            Thread.sleep(10000);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
-        log.info("Inside the account validator");
+        log.info("Inside the account validator, the validators are:{}", this.accountDetailValidators);
+        // Get the list of all the rules
+        RuleCategory ruleCategory = ruleCategoryHelper.getRuleCategory("ACCOUNT");
         AccountValidationResult accountValidationResult = AccountValidationResult.builder()
                 .accountNumber(accountDto.getAccountNumber())
                 .validationExceptions(new ArrayList<>())
                 .build();
-        accountValidationResult =enrollmentSpanValidator.validateEnrollmentSpans(accountValidationResult, accountDto.getEnrollmentSpans());
+        accountValidationResult =accountDetailValidators.get("enrollmentSpanValidator").validate(accountValidationResult, accountDto);
         return Mono.just(accountValidationResult).delayElement(Duration.ofSeconds(30));
     }
 }

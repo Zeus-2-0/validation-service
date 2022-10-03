@@ -2,14 +2,15 @@ package com.brihaspathee.zeus.validator.impl;
 
 import com.brihaspathee.zeus.exception.ValidationException;
 import com.brihaspathee.zeus.message.AccountValidationResult;
-import com.brihaspathee.zeus.validator.interfaces.EnrollmentSpanValidator;
+import com.brihaspathee.zeus.validator.interfaces.AccountDetailValidator;
+import com.brihaspathee.zeus.web.model.AccountDto;
 import com.brihaspathee.zeus.web.model.EnrollmentSpanDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -27,16 +28,18 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EnrollmentSpanValidatorImpl implements EnrollmentSpanValidator {
+@Qualifier("enrollmentSpanValidator")
+public class EnrollmentSpanValidator implements AccountDetailValidator {
 
     /**
      * Method to validate the enrollment spans
      * @param accountValidationResult
-     * @param enrollmentSpanDtos
+     * @param accountDto
      */
     @Override
-    public AccountValidationResult validateEnrollmentSpans(AccountValidationResult accountValidationResult,
-                                        Set<EnrollmentSpanDto> enrollmentSpanDtos) {
+    public AccountValidationResult validate(AccountValidationResult accountValidationResult,
+                                            AccountDto accountDto) {
+        Set<EnrollmentSpanDto> enrollmentSpanDtos = accountDto.getEnrollmentSpans();
         if(checkForOverlappingSpans(enrollmentSpanDtos)){
             accountValidationResult.getValidationExceptions()
                     .add(ValidationException.builder()

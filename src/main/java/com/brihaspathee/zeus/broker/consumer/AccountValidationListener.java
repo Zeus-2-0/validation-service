@@ -129,7 +129,10 @@ public class AccountValidationListener {
 
         accountValidator
                 .validateAccount(payloadTracker, accountDto)
-                .subscribe(accountValidationResultProducer::sendAccountValidationResult);
+                .subscribe(
+                        accountValidationResultProducer::sendAccountValidationResult,
+                        throwable -> log.info(throwable.getMessage()),
+                        () -> log.info("The result is produced and sent to member management service"));
         log.info("After the call to validate the account");
 
         return ack;

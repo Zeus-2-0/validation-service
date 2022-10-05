@@ -1,4 +1,4 @@
-package com.brihaspathee.zeus.validator.interfaces;
+package com.brihaspathee.zeus.validator.rules.interfaces;
 
 import com.brihaspathee.zeus.message.AccountValidationResult;
 import com.brihaspathee.zeus.web.model.AccountDto;
@@ -6,20 +6,19 @@ import com.brihaspathee.zeus.web.model.AccountDto;
 /**
  * Created in Intellij IDEA
  * User: Balaji Varadharajan
- * Date: 02, October 2022
- * Time: 5:13 PM
+ * Date: 04, October 2022
+ * Time: 6:17 AM
  * Project: Zeus
  * Package Name: com.brihaspathee.zeus.validator.interfaces
  * To change this template use File | Settings | File and Code Template
  */
-public interface AccountDetailValidator {
+public interface AccountRule {
 
     /**
-     * Validate the details of an account
+     * Execute the rule
      * @param accountValidationResult
      * @param accountDto
-     * @return
      */
-    AccountValidationResult validate(AccountValidationResult accountValidationResult,
-                                     AccountDto accountDto);
+    void execute(AccountValidationResult accountValidationResult,
+                 AccountDto accountDto);
 }

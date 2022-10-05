@@ -70,6 +70,12 @@ public class Rule {
     private boolean active;
 
     /**
+     * The implementation class of the rule
+     */
+    @Column(name = "rule_impl_name", length = 100, columnDefinition = "varchar", nullable = false)
+    private String ruleImplName;
+
+    /**
      * Date when the record was created
      */
     @CreationTimestamp

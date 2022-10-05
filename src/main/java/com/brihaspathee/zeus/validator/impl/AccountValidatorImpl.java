@@ -2,20 +2,22 @@ package com.brihaspathee.zeus.validator.impl;
 
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.RuleCategory;
+import com.brihaspathee.zeus.domain.entity.RuleSet;
+import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.helper.interfaces.RuleCategoryHelper;
 import com.brihaspathee.zeus.message.AccountValidationResult;
-import com.brihaspathee.zeus.validator.interfaces.AccountDetailValidator;
+import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created in Intellij IDEA
@@ -32,12 +34,12 @@ import java.util.Map;
 public class AccountValidatorImpl implements AccountValidator {
 
     /**
-     * This is a map of all the implementations of the AccountDetailValidator interface
+     * This is a map of all the implementations of the AccountRuleSet interface
      * The key is the camel case version of the implentation class name
-     * E.g. if the class name is "DemographicValidator" the key is assigned as
-     * "demographicValidator"
+     * E.g. if the class name is "DemographicRuleSet" the key is assigned as
+     * "demographicRuleSet"
      */
-    private final Map<String, AccountDetailValidator> accountDetailValidators;
+    private final Map<String, AccountRuleSet> accountRuleSets;
 
     /**
      * Get the rules that are to be executed
@@ -53,14 +55,26 @@ public class AccountValidatorImpl implements AccountValidator {
      */
     @Override
     public Mono<AccountValidationResult> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
-        log.info("Inside the account validator, the validators are:{}", this.accountDetailValidators);
-        // Get the list of all the rules
+        log.info("Inside the account validator, the validators are:{}", this.accountRuleSets);
+        // Get the list of all the rules for the account
         RuleCategory ruleCategory = ruleCategoryHelper.getRuleCategory("ACCOUNT");
+        Set<RuleSet> ruleSets = ruleCategory.getRuleSets();
         AccountValidationResult accountValidationResult = AccountValidationResult.builder()
                 .accountNumber(accountDto.getAccountNumber())
                 .validationExceptions(new ArrayList<>())
                 .build();
-        accountValidationResult =accountDetailValidators.get("enrollmentSpanValidator").validate(accountValidationResult, accountDto);
-        return Mono.just(accountValidationResult).delayElement(Duration.ofSeconds(30));
+        AccountValidationResult finalAccountValidationResult = accountValidationResult;
+        ruleSets.stream().forEach(ruleSet -> {
+            log.info("Rule Set:{}", ruleSet);
+            String ruleSetImplementation = ruleSet.getRuleSetImplName();
+            AccountRuleSet accountRuleSet = accountRuleSets.get(ruleSetImplementation);
+            if(accountRuleSet == null){
+                throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSet.getRuleSetName());
+            }
+            accountRuleSet.validate(finalAccountValidationResult, accountDto, ruleSet);
+        });
+        log.info("Final Account Validation Result:{}", finalAccountValidationResult);
+        // accountValidationResult =accountDetailValidators.get("enrollmentSpanValidator").validate(accountValidationResult, accountDto);
+        return Mono.just(finalAccountValidationResult).delayElement(Duration.ofSeconds(30));
     }
 }

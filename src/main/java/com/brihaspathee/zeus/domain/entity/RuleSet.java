@@ -71,9 +71,15 @@ public class RuleSet {
     private boolean active;
 
     /**
+     * Identifies the implementation class of the rule set
+     */
+    @Column(name = "rule_set_impl_name", columnDefinition = "varchar", nullable = false, length = 100)
+    private String ruleSetImplName;
+
+    /**
      * The rules associated with the rule set
      */
-    @OneToMany(mappedBy = "ruleSet")
+    @OneToMany(mappedBy = "ruleSet", fetch = FetchType.EAGER)
     private Set<Rule> rules;
 
     /**
@@ -89,4 +95,24 @@ public class RuleSet {
     @UpdateTimestamp
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
+
+    /**
+     * toString method
+     * @return
+     */
+    @Override
+    public String toString() {
+        return "RuleSet{" +
+                "ruleSetSK=" + ruleSetSK +
+                ", ruleCategory=" + ruleCategory +
+                ", ruleSetId='" + ruleSetId + '\'' +
+                ", ruleSetName='" + ruleSetName + '\'' +
+                ", ruleSetDesc='" + ruleSetDesc + '\'' +
+                ", active=" + active +
+                ", ruleSetImplName='" + ruleSetImplName + '\'' +
+                ", rules=" + rules +
+                ", createdDate=" + createdDate +
+                ", updatedDate=" + updatedDate +
+                '}';
+    }
 }

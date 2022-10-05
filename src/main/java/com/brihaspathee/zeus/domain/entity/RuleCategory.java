@@ -60,7 +60,7 @@ public class RuleCategory {
     /**
      * The rule sets associated with the rule category
      */
-    @OneToMany(mappedBy = "ruleCategory")
+    @OneToMany(mappedBy = "ruleCategory", fetch = FetchType.EAGER)
     private Set<RuleSet> ruleSets;
 
     /**

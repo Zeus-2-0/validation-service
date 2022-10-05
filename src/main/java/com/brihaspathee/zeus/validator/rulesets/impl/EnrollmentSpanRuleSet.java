@@ -1,8 +1,9 @@
-package com.brihaspathee.zeus.validator.impl;
+package com.brihaspathee.zeus.validator.rulesets.impl;
 
+import com.brihaspathee.zeus.domain.entity.RuleSet;
 import com.brihaspathee.zeus.exception.ValidationException;
 import com.brihaspathee.zeus.message.AccountValidationResult;
-import com.brihaspathee.zeus.validator.interfaces.AccountDetailValidator;
+import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import com.brihaspathee.zeus.web.model.EnrollmentSpanDto;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +29,19 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Qualifier("enrollmentSpanValidator")
-public class EnrollmentSpanValidator implements AccountDetailValidator {
+@Qualifier("enrollmentSpanRuleSet")
+public class EnrollmentSpanRuleSet implements AccountRuleSet {
 
     /**
      * Method to validate the enrollment spans
      * @param accountValidationResult
      * @param accountDto
+     * @param ruleSet
      */
     @Override
-    public AccountValidationResult validate(AccountValidationResult accountValidationResult,
-                                            AccountDto accountDto) {
+    public void validate(AccountValidationResult accountValidationResult,
+                                            AccountDto accountDto,
+                                            RuleSet ruleSet) {
         Set<EnrollmentSpanDto> enrollmentSpanDtos = accountDto.getEnrollmentSpans();
         if(checkForOverlappingSpans(enrollmentSpanDtos)){
             accountValidationResult.getValidationExceptions()
@@ -48,7 +51,6 @@ public class EnrollmentSpanValidator implements AccountDetailValidator {
                             .build());
         }
         log.info("Account Validation Results:{}", accountValidationResult);
-        return accountValidationResult;
     }
 
     /**

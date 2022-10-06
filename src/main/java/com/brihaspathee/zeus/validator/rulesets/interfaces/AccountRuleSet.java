@@ -22,6 +22,6 @@ public interface AccountRuleSet {
      * @param ruleSet
      */
     void validate(AccountValidationResult accountValidationResult,
-                                     AccountDto accountDto,
-                                     RuleSet ruleSet);
+                  AccountDto accountDto,
+                  RuleSet ruleSet);
 }

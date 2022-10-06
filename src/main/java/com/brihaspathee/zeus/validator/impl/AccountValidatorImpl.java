@@ -6,9 +6,9 @@ import com.brihaspathee.zeus.domain.entity.RuleSet;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.helper.interfaces.RuleCategoryHelper;
 import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
+import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
-import com.brihaspathee.zeus.validator.rules.RuleMessage;
 import com.brihaspathee.zeus.validator.rules.RuleResult;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
@@ -72,7 +72,7 @@ public class AccountValidatorImpl implements AccountValidator {
         // Create the account validation result object with the necessary members
         // so that the results of the rules for the account and for each member can be stored
         AccountValidationResult finalAccountValidationResult =
-                constructAccountValidationResult(accountDto);
+                constructAccountValidationResult(payloadTracker, accountDto);
         // Iterate through each rule set
         ruleSets.stream().forEach(ruleSet -> {
             log.info("Rule Set:{}", ruleSet);
@@ -101,8 +101,11 @@ public class AccountValidatorImpl implements AccountValidator {
      * @param accountDto
      * @return
      */
-    private AccountValidationResult constructAccountValidationResult(AccountDto accountDto){
+    private AccountValidationResult constructAccountValidationResult(PayloadTracker payloadTracker,
+                                                                     AccountDto accountDto){
         return AccountValidationResult.builder()
+                .responseId(ZeusRandomStringGenerator.randomString(15))
+                .requestPayloadId(payloadTracker.getPayloadId())
                 // Set the account number of the account that is to be validated
                 .accountNumber(accountDto.getAccountNumber())
                 // Create an empty array of rule result objects where the result of the rules will be stored

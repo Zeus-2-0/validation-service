@@ -1,7 +1,6 @@
 package com.brihaspathee.zeus.validator.rules.impl;
 
 import com.brihaspathee.zeus.domain.entity.Rule;
-import com.brihaspathee.zeus.exception.ValidationException;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
 import com.brihaspathee.zeus.validator.rules.RuleMessage;
@@ -88,7 +87,7 @@ public class DateOfBirthRule implements AccountRule {
             demographicRule.getRuleMessages()
                     .add(RuleMessage.builder()
                             .messageDescription("Date of birth is not present for the member")
-                            .messageCode("150002")
+                            .messageCode("1500002")
                             .messageTypeCode("CRITICAL")
                     .build());
             return false;
@@ -106,7 +105,7 @@ public class DateOfBirthRule implements AccountRule {
             demographicRule.getRuleMessages()
                     .add(RuleMessage.builder()
                             .messageDescription("Date of birth is in the future")
-                            .messageCode("150003")
+                            .messageCode("1500003")
                             .messageTypeCode("CRITICAL")
                     .build());
         }
@@ -122,7 +121,7 @@ public class DateOfBirthRule implements AccountRule {
             demographicRule.getRuleMessages()
                     .add(RuleMessage.builder()
                             .messageDescription("Date of birth is prior to 1/1/1900")
-                            .messageCode("150004")
+                            .messageCode("1500004")
                             .messageTypeCode("CRITICAL")
                     .build());
         }

@@ -127,10 +127,19 @@ public class AccountValidationListener {
         AccountDto accountDto = messagePayload.getPayload().getAccountDto();
         log.info("Total number of enrollment spans:{}", accountDto.getEnrollmentSpans().size());
 
+        PayloadTracker finalPayloadTracker = payloadTracker;
         accountValidator
                 .validateAccount(payloadTracker, accountDto)
                 .subscribe(
-                        accountValidationResultProducer::sendAccountValidationResult,
+                        accountValidationResult ->
+                        {
+                            try {
+                                accountValidationResultProducer.sendAccountValidationResult(
+                                        finalPayloadTracker, accountValidationResult);
+                            } catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
+                        },
                         throwable -> log.info(throwable.getMessage()),
                         () -> log.info("The result is produced and sent to member management service"));
         log.info("After the call to validate the account");

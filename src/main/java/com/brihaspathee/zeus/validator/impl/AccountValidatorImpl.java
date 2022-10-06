@@ -5,6 +5,7 @@ import com.brihaspathee.zeus.domain.entity.RuleCategory;
 import com.brihaspathee.zeus.domain.entity.RuleSet;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.helper.interfaces.RuleCategoryHelper;
+import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
 import com.brihaspathee.zeus.validator.rules.RuleMessage;
@@ -50,6 +51,11 @@ public class AccountValidatorImpl implements AccountValidator {
      */
     private final RuleCategoryHelper ruleCategoryHelper;
 
+    /**
+     * The rule execution helper to save all the rules there were executed for the payload
+     */
+    private final RuleExecutionHelper ruleExecutionHelper;
+
 
     /**
      * The method to validate the account
@@ -85,6 +91,7 @@ public class AccountValidatorImpl implements AccountValidator {
         // indicate if the validation of the account overall passed or failsed
         checkIfValidationPassed(finalAccountValidationResult);
         log.info("Final Account Validation Result:{}", finalAccountValidationResult);
+        saveExecutedRules(payloadTracker,finalAccountValidationResult);
         // Send the results back
         return Mono.just(finalAccountValidationResult).delayElement(Duration.ofSeconds(5));
     }
@@ -150,6 +157,31 @@ public class AccountValidatorImpl implements AccountValidator {
                 }else {
                     // at this point all the account and member level rules have passed
                     accountValidationResult.setValidationPassed(true);
+                }
+            });
+        }
+    }
+
+    /**
+     * Save all the rules that were executed
+     * @param payloadTracker
+     * @param accountValidationResult
+     */
+    private void saveExecutedRules(PayloadTracker payloadTracker, AccountValidationResult accountValidationResult){
+        if (accountValidationResult.getRuleResults() != null &&
+                accountValidationResult.getRuleResults().size() > 0){
+            accountValidationResult.getRuleResults().stream().forEach(ruleResult -> {
+                ruleExecutionHelper.saveRulesExecuted(payloadTracker, ruleResult);
+            });
+        }
+        if(accountValidationResult.getMemberValidationResults() != null &&
+                accountValidationResult.getMemberValidationResults().size() > 0){
+            accountValidationResult.getMemberValidationResults().stream().forEach(memberValidationResult -> {
+                if(memberValidationResult.getRuleResults() != null &&
+                        memberValidationResult.getRuleResults().size() > 0){
+                    memberValidationResult.getRuleResults().stream().forEach(ruleResult -> {
+                        ruleExecutionHelper.saveRulesExecuted(payloadTracker, ruleResult);
+                    });
                 }
             });
         }

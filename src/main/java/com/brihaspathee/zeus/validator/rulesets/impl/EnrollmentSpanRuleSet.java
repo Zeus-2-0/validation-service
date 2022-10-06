@@ -3,23 +3,17 @@ package com.brihaspathee.zeus.validator.rulesets.impl;
 import com.brihaspathee.zeus.domain.entity.Rule;
 import com.brihaspathee.zeus.domain.entity.RuleSet;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
-import com.brihaspathee.zeus.exception.ValidationException;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.rules.interfaces.AccountRule;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import com.brihaspathee.zeus.web.model.AccountDto;
-import com.brihaspathee.zeus.web.model.EnrollmentSpanDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created in Intellij IDEA
@@ -52,8 +46,8 @@ public class EnrollmentSpanRuleSet implements AccountRuleSet {
      */
     @Override
     public void validate(AccountValidationResult accountValidationResult,
-                                            AccountDto accountDto,
-                                            RuleSet ruleSet) {
+                         AccountDto accountDto,
+                         RuleSet ruleSet) {
         log.info("Inside the demographic rule set");
         // Get all the rules that are to be executed for validating the enrollment span
         Set<Rule> enrollmentSpanRules = ruleSet.getRules();

@@ -46,8 +46,8 @@ public class DemographicRuleSet implements AccountRuleSet {
      */
     @Override
     public void validate(AccountValidationResult accountValidationResult,
-                                            AccountDto accountDto,
-                                            RuleSet ruleSet) {
+                         AccountDto accountDto,
+                         RuleSet ruleSet) {
         log.info("Inside the demographic rule set");
         // Get all the rules that are to be executed for validating the enrollment span
         Set<Rule> demoRules = ruleSet.getRules();

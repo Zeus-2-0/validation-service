@@ -1,6 +1,7 @@
-package com.brihaspathee.zeus.message;
+package com.brihaspathee.zeus.validator;
 
 import com.brihaspathee.zeus.exception.ValidationException;
+import com.brihaspathee.zeus.validator.rules.RuleResult;
 import lombok.*;
 
 import java.util.List;
@@ -27,14 +28,20 @@ public class AccountValidationResult {
     private String accountNumber;
 
     /**
-     * indicates if the validation passed or failed
+     * indicates if the validation passed or failed, this will indicate a failure even if
+     * one of the rules at the account level or at the member level failed
      */
     private boolean validationPassed;
 
     /**
-     * Contains the list of validation exceptions
+     * The results of the rules that were executed for the account
      */
-    private List<ValidationException> validationExceptions;
+    private List<RuleResult> ruleResults;
+
+    /**
+     * The validation results for the members who are present in the account
+     */
+    private List<MemberValidationResult> memberValidationResults;
 
     /**
      * toString
@@ -45,7 +52,8 @@ public class AccountValidationResult {
         return "AccountValidationResult{" +
                 "accountNumber='" + accountNumber + '\'' +
                 ", validationPassed=" + validationPassed +
-                ", validationExceptions=" + validationExceptions +
+                ", ruleResults=" + ruleResults +
+                ", memberValidationResults=" + memberValidationResults +
                 '}';
     }
 }

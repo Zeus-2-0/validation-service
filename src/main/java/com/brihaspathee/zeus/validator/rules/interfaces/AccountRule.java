@@ -1,6 +1,7 @@
 package com.brihaspathee.zeus.validator.rules.interfaces;
 
-import com.brihaspathee.zeus.message.AccountValidationResult;
+import com.brihaspathee.zeus.domain.entity.Rule;
+import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.web.model.AccountDto;
 
 /**
@@ -18,7 +19,9 @@ public interface AccountRule {
      * Execute the rule
      * @param accountValidationResult
      * @param accountDto
+     * @param rule
      */
     void execute(AccountValidationResult accountValidationResult,
-                 AccountDto accountDto);
+                 AccountDto accountDto,
+                 Rule rule);
 }

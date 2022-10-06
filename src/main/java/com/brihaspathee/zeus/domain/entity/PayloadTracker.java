@@ -82,8 +82,14 @@ public class PayloadTracker {
     /**
      * The detail tracker of the payload
      */
-    @OneToMany(mappedBy = "payloadTracker")
+    @OneToMany(mappedBy = "payloadTracker", fetch = FetchType.EAGER)
     private Set<PayloadTrackerDetail> payloadTrackerDetails;
+
+    /**
+     * The list of rules that were executed for the payload
+     */
+    @OneToMany(mappedBy = "payloadTracker", fetch = FetchType.EAGER)
+    private Set<RuleExecuted> rulesExecuted;
 
     /**
      * The date when the record was created
@@ -114,6 +120,7 @@ public class PayloadTracker {
                 ", payloadDirectionTypeCode='" + payloadDirectionTypeCode + '\'' +
                 ", sourceDestinations='" + sourceDestinations + '\'' +
                 ", payloadTrackerDetails=" + payloadTrackerDetails +
+                ", rulesExecuted=" + rulesExecuted +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
                 '}';

@@ -75,3 +75,34 @@ CREATE TABLE IF NOT EXISTS `validationdb`.`rule` (
     ON UPDATE NO ACTION)
     ENGINE = InnoDB
     COMMENT = 'This table contains the list of all the rules that are associated with a rule set.';
+CREATE TABLE IF NOT EXISTS `validationdb`.`rule_executed` (
+    `rule_executed_sk` VARCHAR(36) NOT NULL COMMENT 'The primary key of the table',
+    `payload_tracker_sk` VARCHAR(36) NOT NULL COMMENT 'The payload for which the rules were executed',
+    `rule_id` VARCHAR(50) NOT NULL COMMENT 'The id of the rule',
+    `rule_passed` BOOLEAN NOT NULL COMMENT 'Indicates if the rule passed or failed',
+    `created_date` DATETIME NULL COMMENT 'The date when the record was created',
+    `updated_date` DATETIME NULL COMMENT 'The date when the record was updated',
+    PRIMARY KEY (`rule_executed_sk`),
+    INDEX `payload_tracker_fk_idx` (`payload_tracker_sk` ASC) VISIBLE,
+    CONSTRAINT `payload_tracker_fk1`
+    FOREIGN KEY (`payload_tracker_sk`)
+    REFERENCES `validationdb`.`payload_tracker` (`payload_tracker_sk`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    COMMENT = 'This table contains the list of all the rules that are executed for the payload';
+CREATE TABLE IF NOT EXISTS `validationdb`.`rule_execution_message` (
+    `rule_execution_message_sk` VARCHAR(36) NOT NULL COMMENT 'The primary key of the table',
+    `rule_executed_sk` VARCHAR(36) NOT NULL COMMENT 'The rule result for which the message was generated',
+    `message_code` VARCHAR(50) NOT NULL COMMENT 'The message code of the message',
+    `created_date` DATETIME NULL COMMENT 'The date when the record was created',
+    `updated_date` DATETIME NULL COMMENT 'The date when the record was updated',
+    PRIMARY KEY (`rule_execution_message_sk`),
+    INDEX `rule_result_fk_idx` (`rule_executed_sk` ASC) VISIBLE,
+    CONSTRAINT `rule_executed_fk`
+    FOREIGN KEY (`rule_executed_sk`)
+    REFERENCES `validationdb`.`rule_executed` (`rule_executed_sk`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    COMMENT = 'The messages that are generated for the table';

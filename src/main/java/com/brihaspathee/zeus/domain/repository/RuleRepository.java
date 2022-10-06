@@ -2,6 +2,7 @@ package com.brihaspathee.zeus.domain.repository;
 
 import com.brihaspathee.zeus.domain.entity.Rule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
@@ -14,5 +15,6 @@ import java.util.UUID;
  * Package Name: com.brihaspathee.zeus.domain.repository
  * To change this template use File | Settings | File and Code Template
  */
+@Repository
 public interface RuleRepository extends JpaRepository<Rule, UUID> {
 }

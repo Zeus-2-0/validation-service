@@ -88,18 +88,60 @@ public class AccountValidationListener {
                 valueAsString,
                 new TypeReference<ZeusMessagePayload<AccountValidationRequest>>(){});
 
-        // Save the payload to the payload tracjer
-        PayloadTracker payloadTracker = PayloadTracker.builder()
-                .payloadId(messagePayload.getPayload().getValidationMessageId())
-                .payload_key(messagePayload.getPayload().getAccountDto().getAccountNumber())
-                .payload_key_type_code("ACCOUNT")
-                .payloadDirectionTypeCode("INBOUND")
-                .sourceDestinations(messagePayload.getMessageMetadata().getMessageSource())
-                .payload(valueAsString)
-                .build();
-        payloadTracker = payloadTrackerHelper.createPayloadTracker(payloadTracker);
+        // Save the payload to the payload tracker
+        PayloadTracker payloadTracker = savePayloadTracker(valueAsString, messagePayload);
 
         // Create the acknowledgment back to member management service
+
+        ZeusMessagePayload<AccountValidationAcknowledgement> ack = createAcknowledgment(messagePayload, payloadTracker);
+
+        // Perform validations
+        performAccountValidations(messagePayload, payloadTracker);
+        log.info("After the call to validate the account");
+
+        return ack;
+    }
+
+    /**
+     * This method performs the following functions
+     * 1. Perform the validations on the account data
+     * 2. Sends the response back to member management service
+     * 3. Saves the response payload detail
+     * @param messagePayload
+     * @param payloadTracker
+     */
+    private void performAccountValidations(ZeusMessagePayload<AccountValidationRequest> messagePayload, PayloadTracker payloadTracker) {
+        log.info(messagePayload.getPayload().getAccountDto().getAccountNumber());
+        AccountDto accountDto = messagePayload.getPayload().getAccountDto();
+        log.info("Total number of enrollment spans:{}", accountDto.getEnrollmentSpans().size());
+
+        PayloadTracker finalPayloadTracker = payloadTracker;
+        accountValidator
+                .validateAccount(payloadTracker, accountDto)
+                .subscribe(
+                        accountValidationResult ->
+                        {
+                            try {
+                                accountValidationResultProducer.sendAccountValidationResult(
+                                        finalPayloadTracker, accountValidationResult);
+                            } catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        throwable -> log.info(throwable.getMessage()),
+                        () -> log.info("The result is produced and sent to member management service"));
+    }
+
+    /**
+     * Create the acknowledgement to send back to member management service
+     * @param messagePayload
+     * @param payloadTracker
+     * @return
+     * @throws JsonProcessingException
+     */
+    private ZeusMessagePayload<AccountValidationAcknowledgement> createAcknowledgment(
+            ZeusMessagePayload<AccountValidationRequest> messagePayload,
+            PayloadTracker payloadTracker) throws JsonProcessingException {
         String[] messageDestinations = {"MEMBER-MGMT-SERVICE"};
         ZeusMessagePayload<AccountValidationAcknowledgement> ack = ZeusMessagePayload.<AccountValidationAcknowledgement>builder()
                 .messageMetadata(MessageMetadata.builder()
@@ -121,29 +163,25 @@ public class AccountValidationListener {
                 .responsePayload(ackAsString)
                 .build();
         payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
-
-        // Perform validations
-        log.info(messagePayload.getPayload().getAccountDto().getAccountNumber());
-        AccountDto accountDto = messagePayload.getPayload().getAccountDto();
-        log.info("Total number of enrollment spans:{}", accountDto.getEnrollmentSpans().size());
-
-        PayloadTracker finalPayloadTracker = payloadTracker;
-        accountValidator
-                .validateAccount(payloadTracker, accountDto)
-                .subscribe(
-                        accountValidationResult ->
-                        {
-                            try {
-                                accountValidationResultProducer.sendAccountValidationResult(
-                                        finalPayloadTracker, accountValidationResult);
-                            } catch (JsonProcessingException e) {
-                                e.printStackTrace();
-                            }
-                        },
-                        throwable -> log.info(throwable.getMessage()),
-                        () -> log.info("The result is produced and sent to member management service"));
-        log.info("After the call to validate the account");
-
         return ack;
+    }
+
+    /**
+     * This method will save the payload tracker
+     * @param valueAsString
+     * @param messagePayload
+     * @return
+     */
+    private PayloadTracker savePayloadTracker(String valueAsString, ZeusMessagePayload<AccountValidationRequest> messagePayload) {
+        PayloadTracker payloadTracker = PayloadTracker.builder()
+                .payloadId(messagePayload.getPayload().getValidationMessageId())
+                .payload_key(messagePayload.getPayload().getAccountDto().getAccountNumber())
+                .payload_key_type_code("ACCOUNT")
+                .payloadDirectionTypeCode("INBOUND")
+                .sourceDestinations(messagePayload.getMessageMetadata().getMessageSource())
+                .payload(valueAsString)
+                .build();
+        payloadTracker = payloadTrackerHelper.createPayloadTracker(payloadTracker);
+        return payloadTracker;
     }
 }

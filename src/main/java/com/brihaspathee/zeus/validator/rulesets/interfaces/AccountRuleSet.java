@@ -1,10 +1,8 @@
 package com.brihaspathee.zeus.validator.rulesets.interfaces;
 
 import com.brihaspathee.zeus.domain.entity.RuleSet;
-import com.brihaspathee.zeus.message.AccountValidationResult;
+import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.web.model.AccountDto;
-
-import java.util.Set;
 
 /**
  * Created in Intellij IDEA

@@ -1,6 +1,6 @@
 package com.brihaspathee.zeus.broker.producer;
 
-import com.brihaspathee.zeus.message.AccountValidationResult;
+import com.brihaspathee.zeus.validator.AccountValidationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

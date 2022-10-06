@@ -1,6 +1,7 @@
 package com.brihaspathee.zeus.validator.rules.impl;
 
-import com.brihaspathee.zeus.message.AccountValidationResult;
+import com.brihaspathee.zeus.domain.entity.Rule;
+import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.rules.interfaces.AccountRule;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,12 @@ public class GenderRule implements AccountRule {
      * Execute the gender rules
      * @param accountValidationResult
      * @param accountDto
+     * @param rule
      */
     @Override
-    public void execute(AccountValidationResult accountValidationResult, AccountDto accountDto) {
+    public void execute(AccountValidationResult accountValidationResult,
+                        AccountDto accountDto,
+                        Rule rule) {
 
     }
 }

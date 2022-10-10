@@ -143,6 +143,7 @@ public class AccountValidationListener {
             ZeusMessagePayload<AccountValidationRequest> messagePayload,
             PayloadTracker payloadTracker) throws JsonProcessingException {
         String[] messageDestinations = {"MEMBER-MGMT-SERVICE"};
+        String ackId = ZeusRandomStringGenerator.randomString(15);
         ZeusMessagePayload<AccountValidationAcknowledgement> ack = ZeusMessagePayload.<AccountValidationAcknowledgement>builder()
                 .messageMetadata(MessageMetadata.builder()
                         .messageDestination(messageDestinations)
@@ -150,7 +151,7 @@ public class AccountValidationListener {
                         .messageCreationTimestamp(LocalDateTime.now())
                         .build())
                 .payload(AccountValidationAcknowledgement.builder()
-                        .ackId(ZeusRandomStringGenerator.randomString(15))
+                        .ackId(ackId)
                         .requestPayloadId(messagePayload.getPayload().getValidationMessageId())
                         .build())
                 .build();
@@ -161,6 +162,7 @@ public class AccountValidationListener {
                 .payloadTracker(payloadTracker)
                 .responseTypeCode("ACKNOWLEDGEMENT")
                 .responsePayload(ackAsString)
+                .responsePayloadId(ackId)
                 .build();
         payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
         return ack;

@@ -68,6 +68,7 @@ public class AccountValidationResultProducer {
                 .payloadTracker(payloadTracker)
                 .responseTypeCode("RESPONSE")
                 .responsePayload(valueAsString)
+                .responsePayloadId(accountValidationResult.getResponseId())
                 .build();
         payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
         publishValidationResponse(payloadTrackerDetail.getPayloadTrackerDetailSK().toString(),

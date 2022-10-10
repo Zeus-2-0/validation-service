@@ -60,6 +60,12 @@ public class PayloadTrackerDetail {
     private String responsePayload;
 
     /**
+     * A unique id that is associated with the response payload
+     */
+    @Column(name="response_payload_id")
+    private String responsePayloadId;
+
+    /**
      * The date when the record was created
      */
     @CreationTimestamp

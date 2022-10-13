@@ -6,10 +6,12 @@ import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
 import com.brihaspathee.zeus.message.MessageMetadata;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -54,34 +56,12 @@ public class AccountValidationResultProducer {
 
     /**
      * Send the account validation result back to member management service
-     * @param payloadTracker
-     * @param accountValidationResult
+     * @param validationResult
      */
-    public void sendAccountValidationResult(PayloadTracker payloadTracker,
-                                            AccountValidationResult accountValidationResult) throws JsonProcessingException {
-        log.info("Inside the account validation producer:{}", accountValidationResult);
-        // Convert the payload as String
-        String valueAsString = objectMapper.writeValueAsString(accountValidationResult);
+    public void sendAccountValidationResult(ValidationResult<AccountValidationResult> validationResult) throws JsonProcessingException {
+        log.info("Inside the account validation producer:{}", validationResult);
 
-        // Store the response in the detail table
-        PayloadTrackerDetail payloadTrackerDetail = PayloadTrackerDetail.builder()
-                .payloadTracker(payloadTracker)
-                .responseTypeCode("RESPONSE")
-                .responsePayload(valueAsString)
-                .responsePayloadId(accountValidationResult.getResponseId())
-                .build();
-        payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
-        publishValidationResponse(payloadTrackerDetail.getPayloadTrackerDetailSK().toString(),
-                accountValidationResult);
-    }
-
-    /**
-     * Method to publish the response to the member management service
-     * @param payloadId
-     * @param accountValidationResult
-     */
-    private void publishValidationResponse(String payloadId,
-                                           AccountValidationResult accountValidationResult){
+        // Create the result payload that is to be sent to the member management service
         String[] messageDestinations = {"MEMBER-MGMT-SERVICE"};
         ZeusMessagePayload<AccountValidationResult> messagePayload = ZeusMessagePayload.<AccountValidationResult>builder()
                 .messageMetadata(MessageMetadata.builder()
@@ -89,13 +69,46 @@ public class AccountValidationResultProducer {
                         .messageDestination(messageDestinations)
                         .messageCreationTimestamp(LocalDateTime.now())
                         .build())
-                .payload(accountValidationResult)
+                .payload(validationResult.getValidationResult())
                 .build();
-        accountValidationResultCallback.setMessagePayload(accountValidationResult);
+        // Create the payload tracker detail record for the validation result payload
+        PayloadTrackerDetail payloadTrackerDetail = createPayloadTrackerDetail(
+                validationResult.getPayloadTracker(),
+                messagePayload);
+        accountValidationResultCallback.setMessagePayload(validationResult.getValidationResult());
+        // Build the producer record
         ProducerRecord<String, ZeusMessagePayload<AccountValidationResult>> producerRecord =
-                buildProducerRecord(payloadId, messagePayload);
+                buildProducerRecord(payloadTrackerDetail.getResponsePayloadId(), messagePayload);
+        // Send to kafka topic
         kafkaTemplate.send(producerRecord).addCallback(accountValidationResultCallback);
         log.info("After the sending the validation response to member management service is called");
+    }
+
+    /**
+     * Create the payload tracker detail record
+     * @param payloadTracker
+     * @param messagePayload
+     * @return
+     * @throws JsonProcessingException
+     */
+    private PayloadTrackerDetail createPayloadTrackerDetail(
+            PayloadTracker payloadTracker,
+            ZeusMessagePayload<AccountValidationResult> messagePayload) throws JsonProcessingException {
+        // Convert the payload as String
+        String valueAsString = objectMapper.writeValueAsString(messagePayload);
+        // Store the response in the detail table
+        PayloadTrackerDetail payloadTrackerDetail = PayloadTrackerDetail.builder()
+                .payloadTracker(payloadTracker)
+                .responseTypeCode("RESULT")
+                .responsePayload(valueAsString)
+                .responsePayloadId(messagePayload.getPayload().getResponseId())
+                .payloadDirectionTypeCode("OUTBOUND")
+                .sourceDestinations(StringUtils.join(
+                        messagePayload.getMessageMetadata().getMessageDestination(),
+                        ','))
+                .build();
+        payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
+        return payloadTrackerDetail;
     }
 
     /**

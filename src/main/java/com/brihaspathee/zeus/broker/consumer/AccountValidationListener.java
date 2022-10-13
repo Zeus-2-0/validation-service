@@ -5,11 +5,11 @@ import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.PayloadTrackerDetail;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerHelper;
-import com.brihaspathee.zeus.message.AccountValidationAcknowledgement;
-import com.brihaspathee.zeus.message.AccountValidationRequest;
-import com.brihaspathee.zeus.message.MessageMetadata;
-import com.brihaspathee.zeus.message.ZeusMessagePayload;
+import com.brihaspathee.zeus.message.*;
+import com.brihaspathee.zeus.subscriber.AccountValidationSubscriber;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
+import com.brihaspathee.zeus.validator.AccountValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResult;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
 import com.brihaspathee.zeus.web.model.AccountDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -65,6 +66,11 @@ public class AccountValidationListener {
     private final AccountValidationResultProducer accountValidationResultProducer;
 
     /**
+     * The subscriber for the account validation
+     */
+    private final AccountValidationSubscriber<ValidationResult<AccountValidationResult>> accountValidationSubscriber;
+
+    /**
      * kafka consumer to consume the messages
      * @param consumerRecord
      * @return
@@ -72,7 +78,7 @@ public class AccountValidationListener {
      */
     @KafkaListener(topics = "ZEUS.VALIDATOR.ACCOUNT.REQ")
     @SendTo("ZEUS.VALIDATOR.ACCOUNT.ACK")
-    public ZeusMessagePayload<AccountValidationAcknowledgement> listen(
+    public ZeusMessagePayload<Acknowledgement> listen(
             ConsumerRecord<String, ZeusMessagePayload<AccountValidationRequest>> consumerRecord)
             throws JsonProcessingException {
         Headers headers = consumerRecord.headers();
@@ -93,7 +99,7 @@ public class AccountValidationListener {
 
         // Create the acknowledgment back to member management service
 
-        ZeusMessagePayload<AccountValidationAcknowledgement> ack = createAcknowledgment(messagePayload, payloadTracker);
+        ZeusMessagePayload<Acknowledgement> ack = createAcknowledgment(messagePayload, payloadTracker);
 
         // Perform validations
         performAccountValidations(messagePayload, payloadTracker);
@@ -118,18 +124,21 @@ public class AccountValidationListener {
         PayloadTracker finalPayloadTracker = payloadTracker;
         accountValidator
                 .validateAccount(payloadTracker, accountDto)
-                .subscribe(
-                        accountValidationResult ->
-                        {
-                            try {
-                                accountValidationResultProducer.sendAccountValidationResult(
-                                        finalPayloadTracker, accountValidationResult);
-                            } catch (JsonProcessingException e) {
-                                e.printStackTrace();
-                            }
-                        },
-                        throwable -> log.info(throwable.getMessage()),
-                        () -> log.info("The result is produced and sent to member management service"));
+                .subscribe(accountValidationSubscriber);
+//        accountValidator
+//                .validateAccount(payloadTracker, accountDto)
+//                .subscribe(
+//                        accountValidationResult ->
+//                        {
+//                            try {
+//                                accountValidationResultProducer.sendAccountValidationResult(
+//                                        accountValidationResult);
+//                            } catch (JsonProcessingException e) {
+//                                e.printStackTrace();
+//                            }
+//                        },
+//                        throwable -> log.info(throwable.getMessage()),
+//                        () -> log.info("The result is produced and sent to member management service"));
     }
 
     /**
@@ -139,18 +148,18 @@ public class AccountValidationListener {
      * @return
      * @throws JsonProcessingException
      */
-    private ZeusMessagePayload<AccountValidationAcknowledgement> createAcknowledgment(
+    private ZeusMessagePayload<Acknowledgement> createAcknowledgment(
             ZeusMessagePayload<AccountValidationRequest> messagePayload,
             PayloadTracker payloadTracker) throws JsonProcessingException {
         String[] messageDestinations = {"MEMBER-MGMT-SERVICE"};
         String ackId = ZeusRandomStringGenerator.randomString(15);
-        ZeusMessagePayload<AccountValidationAcknowledgement> ack = ZeusMessagePayload.<AccountValidationAcknowledgement>builder()
+        ZeusMessagePayload<Acknowledgement> ack = ZeusMessagePayload.<Acknowledgement>builder()
                 .messageMetadata(MessageMetadata.builder()
                         .messageDestination(messageDestinations)
                         .messageSource("VALIDATION-SERVICE")
                         .messageCreationTimestamp(LocalDateTime.now())
                         .build())
-                .payload(AccountValidationAcknowledgement.builder()
+                .payload(Acknowledgement.builder()
                         .ackId(ackId)
                         .requestPayloadId(messagePayload.getPayload().getValidationMessageId())
                         .build())
@@ -163,6 +172,8 @@ public class AccountValidationListener {
                 .responseTypeCode("ACKNOWLEDGEMENT")
                 .responsePayload(ackAsString)
                 .responsePayloadId(ackId)
+                .payloadDirectionTypeCode("OUTBOUND")
+                .sourceDestinations(StringUtils.join(messageDestinations, ','))
                 .build();
         payloadTrackerDetailHelper.createPayloadTrackerDetail(payloadTrackerDetail);
         return ack;

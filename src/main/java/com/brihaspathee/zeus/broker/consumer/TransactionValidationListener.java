@@ -1,8 +1,6 @@
 package com.brihaspathee.zeus.broker.consumer;
 
-import com.brihaspathee.zeus.domain.entity.PayloadTracker;
-import com.brihaspathee.zeus.message.AccountValidationAcknowledgement;
-import com.brihaspathee.zeus.message.AccountValidationRequest;
+import com.brihaspathee.zeus.message.Acknowledgement;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
 import com.brihaspathee.zeus.web.model.TransactionDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,7 +40,7 @@ public class TransactionValidationListener {
      */
     @KafkaListener(topics = "ZEUS.VALIDATOR.TRANSACTION.REQ")
     // @SendTo("ZEUS.VALIDATOR.TRANSACTION.ACK")
-    public ZeusMessagePayload<AccountValidationAcknowledgement> listen(
+    public ZeusMessagePayload<Acknowledgement> listen(
             ConsumerRecord<String, ZeusMessagePayload<TransactionDto>> consumerRecord)
             throws JsonProcessingException {
         Headers headers = consumerRecord.headers();

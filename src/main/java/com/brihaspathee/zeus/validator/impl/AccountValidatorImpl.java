@@ -9,6 +9,7 @@ import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResult;
 import com.brihaspathee.zeus.validator.rules.RuleResult;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
@@ -64,7 +65,7 @@ public class AccountValidatorImpl implements AccountValidator {
      * @return
      */
     @Override
-    public Mono<AccountValidationResult> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
+    public Mono<ValidationResult<AccountValidationResult>> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
         log.info("Inside the account validator, the validators are:{}", this.accountRuleSets);
         // Get the list of all the rules for the account
         RuleCategory ruleCategory = ruleCategoryHelper.getRuleCategory("ACCOUNT");
@@ -93,7 +94,13 @@ public class AccountValidatorImpl implements AccountValidator {
         log.info("Final Account Validation Result:{}", finalAccountValidationResult);
         saveExecutedRules(payloadTracker,finalAccountValidationResult);
         // Send the results back
-        return Mono.just(finalAccountValidationResult).delayElement(Duration.ofSeconds(5));
+        ValidationResult<AccountValidationResult> validationResult =
+                ValidationResult.<AccountValidationResult>builder()
+                        .payloadTracker(payloadTracker)
+                        .validationResult(finalAccountValidationResult)
+                        .build();
+
+        return Mono.just(validationResult).delayElement(Duration.ofSeconds(5));
     }
 
     /**

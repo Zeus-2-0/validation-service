@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS `validationdb`.`payload_tracker_detail` (
     `response_type_code` VARCHAR(45) NOT NULL COMMENT 'The type of response received or sent. e.g. ACK, RESULT etc',
     `response_payload` LONGTEXT NOT NULL,
     `response_payload_id` VARCHAR(45) NULL,
+    `payload_direction_type_code` VARCHAR(45) NOT NULL COMMENT 'Identifies the direction of the payload INBOUND or OUTBOUND',
+    `src_dest` VARCHAR(100) NOT NULL COMMENT 'Identifies the source of the  payload if direction is inbound and destination if the direction is outbound',
     `created_date` DATETIME NULL COMMENT 'The date when the record was created',
     `updated_date` DATETIME NULL COMMENT 'The date when the record was updated',
     PRIMARY KEY (`payload_tracker_detail_sk`),

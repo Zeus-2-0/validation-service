@@ -53,7 +53,7 @@ public class TransactionValidationResultProducer {
     /**
      * ListenableFutureCallback class that is used after success or failure of publishing the message
      */
-    private TransactionValidationResultCallback transactionValidationResultCallback;
+    private final TransactionValidationResultCallback transactionValidationResultCallback;
 
     /**
      * Send the account validation result back to member management service

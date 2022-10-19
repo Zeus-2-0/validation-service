@@ -1,8 +1,8 @@
 package com.brihaspathee.zeus.validator.rules.interfaces;
 
 import com.brihaspathee.zeus.domain.entity.Rule;
+import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
-import com.brihaspathee.zeus.web.model.AccountDto;
 
 /**
  * Created in Intellij IDEA

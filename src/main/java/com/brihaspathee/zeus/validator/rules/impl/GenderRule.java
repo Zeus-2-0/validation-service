@@ -1,9 +1,9 @@
 package com.brihaspathee.zeus.validator.rules.impl;
 
 import com.brihaspathee.zeus.domain.entity.Rule;
+import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.rules.interfaces.AccountRule;
-import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

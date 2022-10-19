@@ -1,9 +1,9 @@
 package com.brihaspathee.zeus.validator.interfaces;
 
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
+import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.ValidationResult;
-import com.brihaspathee.zeus.web.model.AccountDto;
 import reactor.core.publisher.Mono;
 
 /**

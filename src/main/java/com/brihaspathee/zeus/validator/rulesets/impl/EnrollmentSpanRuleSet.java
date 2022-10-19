@@ -2,11 +2,11 @@ package com.brihaspathee.zeus.validator.rulesets.impl;
 
 import com.brihaspathee.zeus.domain.entity.Rule;
 import com.brihaspathee.zeus.domain.entity.RuleSet;
+import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.rules.interfaces.AccountRule;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
-import com.brihaspathee.zeus.web.model.AccountDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -1,0 +1,31 @@
+zeus-rules:
+  api:
+    version: 1.0.0
+server:
+  port: 8098
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  profiles:
+    active: clean, local
+  datasource:
+    url: jdbc:mysql://localhost:3306/rulesdb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: rulesapp
+    password: password
+  flyway:
+    user: rulesadmin
+    password: password
+logging:
+  file:
+    name: logs/local/rules.log
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql: trace

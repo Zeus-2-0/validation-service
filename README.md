@@ -1,4 +1,4 @@
-# Validation Service
+# Rule Service
 [![CircleCI](https://circleci.com/gh/Zeus-2-0/rule-service/tree/master.svg?style=svg)](https://circleci.com/gh/Zeus-2-0/rule-service/tree/master)
 
 ## Service Highlights

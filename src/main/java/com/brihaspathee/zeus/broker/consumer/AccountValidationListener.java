@@ -10,7 +10,7 @@ import com.brihaspathee.zeus.message.*;
 import com.brihaspathee.zeus.subscriber.AccountValidationSubscriber;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResponse;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -68,7 +68,7 @@ public class AccountValidationListener {
     /**
      * The subscriber for the account validation
      */
-    private final AccountValidationSubscriber<ValidationResult<AccountValidationResult>> accountValidationSubscriber;
+    private final AccountValidationSubscriber<ValidationResponse<AccountValidationResult>> accountValidationSubscriber;
 
     /**
      * kafka consumer to consume the messages

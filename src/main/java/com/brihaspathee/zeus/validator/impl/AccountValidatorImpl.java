@@ -10,7 +10,7 @@ import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResponse;
 import com.brihaspathee.zeus.validator.rules.RuleResult;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import com.brihaspathee.zeus.validator.interfaces.AccountValidator;
@@ -41,7 +41,7 @@ public class AccountValidatorImpl implements AccountValidator {
 
     /**
      * This is a map of all the implementations of the AccountRuleSet interface
-     * The key is the camel case version of the implentation class name
+     * The key is the camel case version of the implementation class name
      * E.g. if the class name is "DemographicRuleSet" the key is assigned as
      * "demographicRuleSet"
      */
@@ -65,7 +65,7 @@ public class AccountValidatorImpl implements AccountValidator {
      * @return
      */
     @Override
-    public Mono<ValidationResult<AccountValidationResult>> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
+    public Mono<ValidationResponse<AccountValidationResult>> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
         log.info("Inside the account validator, the validators are:{}", this.accountRuleSets);
         // Get the list of all the rules for the account
         RuleCategory ruleCategory = ruleCategoryHelper.getRuleCategory("ACCOUNT");
@@ -89,18 +89,18 @@ public class AccountValidatorImpl implements AccountValidator {
             accountRuleSet.validate(finalAccountValidationResult, accountDto, ruleSet);
         });
         // Once all the rules within the ruleset are executed check if any account or member level rules failed to
-        // indicate if the validation of the account overall passed or failsed
+        // indicate if the validation of the account overall passed or failed
         checkIfValidationPassed(finalAccountValidationResult);
         log.info("Final Account Validation Result:{}", finalAccountValidationResult);
         saveExecutedRules(payloadTracker,finalAccountValidationResult);
         // Send the results back
-        ValidationResult<AccountValidationResult> validationResult =
-                ValidationResult.<AccountValidationResult>builder()
+        ValidationResponse<AccountValidationResult> validationResponse =
+                ValidationResponse.<AccountValidationResult>builder()
                         .payloadTracker(payloadTracker)
                         .validationResult(finalAccountValidationResult)
                         .build();
 
-        return Mono.just(validationResult).delayElement(Duration.ofSeconds(5));
+        return Mono.just(validationResponse).delayElement(Duration.ofSeconds(5));
     }
 
     /**
@@ -142,7 +142,7 @@ public class AccountValidatorImpl implements AccountValidator {
     }
 
     /**
-     * Check if the account validations passed or faile
+     * Check if the account validations passed or failed
      * @param accountValidationResult
      */
     private void checkIfValidationPassed(AccountValidationResult accountValidationResult){

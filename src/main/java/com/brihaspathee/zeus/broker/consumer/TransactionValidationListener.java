@@ -3,16 +3,18 @@ package com.brihaspathee.zeus.broker.consumer;
 import com.brihaspathee.zeus.broker.producer.TransactionValidationResultProducer;
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.PayloadTrackerDetail;
+import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerHelper;
-import com.brihaspathee.zeus.message.AccountValidationRequest;
 import com.brihaspathee.zeus.message.Acknowledgement;
 import com.brihaspathee.zeus.message.MessageMetadata;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
+import com.brihaspathee.zeus.subscriber.TransactionValidationSubscriber;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResponse;
+import com.brihaspathee.zeus.validator.interfaces.TransactionValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +62,16 @@ public class TransactionValidationListener {
      * The producer that publishes the transaction validation results to transaction manager
      */
     private final TransactionValidationResultProducer transactionValidationResultProducer;
+
+    /**
+     * Transaction validator instance to validate the transaction data
+     */
+    private final TransactionValidator transactionValidator;
+
+    /**
+     * Subscriber to receive and send the response of the validation results
+     */
+    private final TransactionValidationSubscriber transactionValidationSubscriber;
 
     /**
      * kafka consumer to consume the messages
@@ -111,23 +123,23 @@ public class TransactionValidationListener {
      */
     private void performTransactionValidations(ZeusMessagePayload<TransactionDto> messagePayload,
                                            PayloadTracker payloadTracker) throws JsonProcessingException{
-
-        // TODO - Remove this temporary code when the transaction validations are implemented
-        ValidationResult<TransactionValidationResult> transactionValidationResults =
-                ValidationResult.<TransactionValidationResult>builder()
-                        .payloadTracker(payloadTracker)
-                        .validationResult(TransactionValidationResult.builder()
-                                .responseId(ZeusRandomStringGenerator.randomString(15))
-                                .requestPayloadId(payloadTracker.getPayloadId())
-                                .ztcn(messagePayload.getPayload().getZtcn())
-                                .validationPassed(true)
-                                .build())
-                        .build();
-        // This will save the response detail in the payload tracker detail and send the message
-        transactionValidationResultProducer.sendAccountValidationResult(transactionValidationResults);
-//        accountValidator
-//                .validateAccount(payloadTracker, accountDto)
-//                .subscribe(accountValidationSubscriber);
+        log.info(messagePayload.getPayload().getZtcn());
+        TransactionDto transactionDto = messagePayload.getPayload();
+        transactionValidator
+                .validateTransaction(payloadTracker, transactionDto)
+                .subscribe(transactionValidationSubscriber);
+//        ValidationResponse<TransactionValidationResult> transactionValidationResults =
+//                ValidationResponse.<TransactionValidationResult>builder()
+//                        .payloadTracker(payloadTracker)
+//                        .validationResult(TransactionValidationResult.builder()
+//                                .responseId(ZeusRandomStringGenerator.randomString(15))
+//                                .requestPayloadId(payloadTracker.getPayloadId())
+//                                .ztcn(messagePayload.getPayload().getZtcn())
+//                                .validationPassed(true)
+//                                .build())
+//                        .build();
+//        // This will save the response detail in the payload tracker detail and send the message
+//        transactionValidationResultProducer.sendAccountValidationResult(transactionValidationResults);
 
     }
 

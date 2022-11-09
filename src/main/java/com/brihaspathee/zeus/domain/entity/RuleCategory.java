@@ -58,6 +58,12 @@ public class RuleCategory {
     private String ruleCategoryDesc;
 
     /**
+     * Identifies the type of rules within the category. Like “Pre validation rule” and “Business Rules” within the “TRANSACTION” category
+     */
+    @Column(name = "rule_type", length = 50, columnDefinition = "varchar", nullable = false)
+    private String ruleType;
+
+    /**
      * The rule sets associated with the rule category
      */
     @OneToMany(mappedBy = "ruleCategory", fetch = FetchType.EAGER)

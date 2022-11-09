@@ -1,5 +1,9 @@
 package com.brihaspathee.zeus.validator.rules;
 
+import com.brihaspathee.zeus.domain.entity.RuleTransaction;
+
+import java.util.Set;
+
 /**
  * Created in Intellij IDEA
  * User: Balaji Varadharajan
@@ -26,5 +30,19 @@ public class RuleUtil {
         }else{
             ruleResult.setRulePassed(false);
         }
+    }
+
+    /**
+     * Check of the rule applies for the specific transaction
+     * @param ruleTransactions
+     * @param transactionType
+     * @return
+     */
+    public static boolean doesRuleApply(Set<RuleTransaction> ruleTransactions, String transactionType){
+        boolean doesRuleApply =
+                ruleTransactions.stream().anyMatch(
+                ruleTransaction -> ruleTransaction.getTransactionTypeCode().equals(
+                        transactionType));
+        return doesRuleApply;
     }
 }

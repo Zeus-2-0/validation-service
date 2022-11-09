@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -70,10 +71,22 @@ public class Rule {
     private boolean active;
 
     /**
+     * Indicates if the rule applies at the member level
+     */
+    @Column(name = "member_level")
+    private boolean memberLevel;
+
+    /**
      * The implementation class of the rule
      */
     @Column(name = "rule_impl_name", length = 100, columnDefinition = "varchar", nullable = false)
     private String ruleImplName;
+
+    /**
+     * The transaction type associated with the rules
+     */
+    @OneToMany(mappedBy = "rule", fetch = FetchType.EAGER)
+    private Set<RuleTransaction> ruleTransactions;
 
     /**
      * Date when the record was created
@@ -88,4 +101,24 @@ public class Rule {
     @UpdateTimestamp
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
+
+    /**
+     * toString method
+     * @return
+     */
+    @Override
+    public String toString() {
+        return "Rule{" +
+                "ruleSK=" + ruleSK +
+                ", ruleSet=" + ruleSet +
+                ", ruleId='" + ruleId + '\'' +
+                ", ruleName='" + ruleName + '\'' +
+                ", ruleDesc='" + ruleDesc + '\'' +
+                ", active=" + active +
+                ", memberLevel=" + memberLevel +
+                ", ruleImplName='" + ruleImplName + '\'' +
+                ", createdDate=" + createdDate +
+                ", updatedDate=" + updatedDate +
+                '}';
+    }
 }

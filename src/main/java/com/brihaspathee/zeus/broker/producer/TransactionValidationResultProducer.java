@@ -5,9 +5,8 @@ import com.brihaspathee.zeus.domain.entity.PayloadTrackerDetail;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
 import com.brihaspathee.zeus.message.MessageMetadata;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
-import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -57,10 +56,10 @@ public class TransactionValidationResultProducer {
 
     /**
      * Send the account validation result back to member management service
-     * @param validationResult
+     * @param validationResponse
      */
-    public void sendAccountValidationResult(ValidationResult<TransactionValidationResult> validationResult) throws JsonProcessingException {
-        log.info("Inside the account validation producer:{}", validationResult);
+    public void sendAccountValidationResult(ValidationResponse<TransactionValidationResult> validationResponse) throws JsonProcessingException {
+        log.info("Inside the account validation producer:{}", validationResponse);
 
         // Create the result payload that is to be sent to the member management service
         String[] messageDestinations = {"TRANSACTION-MANAGER"};
@@ -70,13 +69,13 @@ public class TransactionValidationResultProducer {
                         .messageDestination(messageDestinations)
                         .messageCreationTimestamp(LocalDateTime.now())
                         .build())
-                .payload(validationResult.getValidationResult())
+                .payload(validationResponse.getValidationResult())
                 .build();
         // Create the payload tracker detail record for the validation result payload
         PayloadTrackerDetail payloadTrackerDetail = createPayloadTrackerDetail(
-                validationResult.getPayloadTracker(),
+                validationResponse.getPayloadTracker(),
                 messagePayload);
-        transactionValidationResultCallback.setValidationResult(validationResult.getValidationResult());
+        transactionValidationResultCallback.setValidationResult(validationResponse.getValidationResult());
         // Build the producer record
         ProducerRecord<String, ZeusMessagePayload<TransactionValidationResult>> producerRecord =
                 buildProducerRecord(payloadTrackerDetail.getResponsePayloadId(), messagePayload);

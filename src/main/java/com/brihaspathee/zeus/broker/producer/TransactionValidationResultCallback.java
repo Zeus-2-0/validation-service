@@ -2,7 +2,6 @@ package com.brihaspathee.zeus.broker.producer;
 
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResult;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

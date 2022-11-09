@@ -2,14 +2,12 @@ package com.brihaspathee.zeus.subscriber;
 
 import com.brihaspathee.zeus.broker.producer.AccountValidationResultProducer;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResult;
+import com.brihaspathee.zeus.validator.ValidationResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.BaseSubscriber;
-
-import java.util.List;
 
 /**
  * Created in Intellij IDEA
@@ -30,18 +28,18 @@ public class AccountValidationSubscriber<T> extends BaseSubscriber<T> {
      */
     private final AccountValidationResultProducer accountValidationResultProducer;
 
-    /**
+    /**accountValidationResultProducer.sendAccountValidationResult(validationResult);
      * The method that is called when the validation of the account is completed
      * @param value
      */
     @Override
     protected void hookOnNext(T value) {
         log.info("Inside hookOnNext:{}");
-        ValidationResult<AccountValidationResult> validationResult =
-                (ValidationResult<AccountValidationResult>) value;
-        log.info("Validation Result:{}", validationResult.getValidationResult().getAccountNumber());
+        ValidationResponse<AccountValidationResult> validationResponse =
+                (ValidationResponse<AccountValidationResult>) value;
+        log.info("Validation Result:{}", validationResponse.getValidationResult().getAccountNumber());
         try {
-            accountValidationResultProducer.sendAccountValidationResult(validationResult);
+            accountValidationResultProducer.sendAccountValidationResult(validationResponse);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

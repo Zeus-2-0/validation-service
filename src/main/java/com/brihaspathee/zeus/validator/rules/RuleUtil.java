@@ -1,8 +1,8 @@
 package com.brihaspathee.zeus.validator.rules;
 
-import com.brihaspathee.zeus.domain.entity.RuleTransaction;
+import com.brihaspathee.zeus.dto.rules.RuleTransactionDto;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created in Intellij IDEA
@@ -38,7 +38,7 @@ public class RuleUtil {
      * @param transactionType
      * @return
      */
-    public static boolean doesRuleApply(Set<RuleTransaction> ruleTransactions, String transactionType){
+    public static boolean doesRuleApply(List<RuleTransactionDto> ruleTransactions, String transactionType){
         boolean doesRuleApply =
                 ruleTransactions.stream().anyMatch(
                 ruleTransaction -> ruleTransaction.getTransactionTypeCode().equals(

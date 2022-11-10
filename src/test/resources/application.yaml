@@ -1,3 +1,6 @@
+url:
+  host:
+    rules: http://localhost:8098/api/v1/zeus/rules/
 spring:
   h2:
     console:

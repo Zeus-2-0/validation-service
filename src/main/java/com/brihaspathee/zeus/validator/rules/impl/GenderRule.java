@@ -1,9 +1,9 @@
 package com.brihaspathee.zeus.validator.rules.impl;
 
-import com.brihaspathee.zeus.domain.entity.Rule;
-import com.brihaspathee.zeus.domain.entity.RuleTransaction;
 import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.account.MemberDto;
+import com.brihaspathee.zeus.dto.rules.RuleDto;
+import com.brihaspathee.zeus.dto.rules.RuleTransactionDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionMemberDto;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class GenderRule implements AccountRule, TransactionRule {
     @Override
     public void execute(AccountValidationResult accountValidationResult,
                         AccountDto accountDto,
-                        Rule rule) {
+                        RuleDto rule) {
         // Gender rule is a member level rule, so get all the members
         Set<MemberDto> memberDtos = accountDto.getMembers();
         memberDtos.stream().forEach(memberDto -> {
@@ -130,9 +129,9 @@ public class GenderRule implements AccountRule, TransactionRule {
     @Override
     public void execute(TransactionValidationResult transactionValidationResult,
                         TransactionDto transactionDto,
-                        Rule rule) {
+                        RuleDto rule) {
         log.info("Inside gender rule");
-        Set<RuleTransaction> transactionTypes = rule.getRuleTransactions();
+        List<RuleTransactionDto> transactionTypes = rule.getRuleTransactions();
         // check if the rule has to be executed for the transaction
         if(RuleUtil.doesRuleApply(transactionTypes,
                 transactionDto.getTransactionDetail().getTransactionTypeCode())){

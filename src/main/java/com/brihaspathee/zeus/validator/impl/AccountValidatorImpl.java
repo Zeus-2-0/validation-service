@@ -1,12 +1,12 @@
 package com.brihaspathee.zeus.validator.impl;
 
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
-import com.brihaspathee.zeus.domain.entity.RuleCategory;
-import com.brihaspathee.zeus.domain.entity.RuleSet;
 import com.brihaspathee.zeus.dto.account.AccountDto;
+import com.brihaspathee.zeus.dto.rules.RuleCategoryDto;
+import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
-import com.brihaspathee.zeus.helper.interfaces.RuleCategoryHelper;
 import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
+import com.brihaspathee.zeus.service.interfaces.RuleService;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created in Intellij IDEA
@@ -50,7 +49,7 @@ public class AccountValidatorImpl implements AccountValidator {
     /**
      * Get the rules that are to be executed
      */
-    private final RuleCategoryHelper ruleCategoryHelper;
+    private final RuleService ruleService;
 
     /**
      * The rule execution helper to save all the rules there were executed for the payload
@@ -68,8 +67,9 @@ public class AccountValidatorImpl implements AccountValidator {
     public Mono<ValidationResponse<AccountValidationResult>> validateAccount(PayloadTracker payloadTracker, AccountDto accountDto) {
         log.info("Inside the account validator, the validators are:{}", this.accountRuleSets);
         // Get the list of all the rules for the account
-        RuleCategory ruleCategory = ruleCategoryHelper.getRuleCategory("ACCOUNT");
-        Set<RuleSet> ruleSets = ruleCategory.getRuleSets();
+        RuleCategoryDto ruleCategory = ruleService.getRules("ACCOUNT",
+                "ACCOUNT_RULE");
+        List<RuleSetDto> ruleSets = ruleCategory.getRuleSets();
         // Create the account validation result object with the necessary members
         // so that the results of the rules for the account and for each member can be stored
         AccountValidationResult finalAccountValidationResult =

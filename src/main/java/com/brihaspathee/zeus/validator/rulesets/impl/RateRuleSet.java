@@ -1,7 +1,7 @@
 package com.brihaspathee.zeus.validator.rulesets.impl;
 
-import com.brihaspathee.zeus.domain.entity.Rule;
-import com.brihaspathee.zeus.domain.entity.RuleSet;
+import com.brihaspathee.zeus.dto.rules.RuleDto;
+import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.exception.RuleImplNotFound;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created in Intellij IDEA
@@ -45,11 +45,11 @@ public class RateRuleSet implements TransactionRuleSet {
     @Override
     public void validate(TransactionValidationResult transactionValidationResult,
                          TransactionDto transactionDto,
-                         RuleSet ruleSet) {
+                         RuleSetDto ruleSet) {
         log.info("Inside the transaction rate rule set");
         // Get all the rules that are to be executed for validating the demographic details of the members in the
         // transaction
-        Set<Rule> rateRules = ruleSet.getRules();
+        List<RuleDto> rateRules = ruleSet.getRules();
         // Iterate through each rules
         rateRules.stream().forEach(rule -> {
             // Get the implementation name of the rule

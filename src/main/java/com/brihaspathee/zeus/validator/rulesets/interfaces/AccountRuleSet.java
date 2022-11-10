@@ -1,7 +1,7 @@
 package com.brihaspathee.zeus.validator.rulesets.interfaces;
 
-import com.brihaspathee.zeus.domain.entity.RuleSet;
 import com.brihaspathee.zeus.dto.account.AccountDto;
+import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 
 /**
@@ -23,5 +23,5 @@ public interface AccountRuleSet {
      */
     void validate(AccountValidationResult accountValidationResult,
                   AccountDto accountDto,
-                  RuleSet ruleSet);
+                  RuleSetDto ruleSet);
 }

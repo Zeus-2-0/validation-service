@@ -1,3 +1,6 @@
+url:
+  host:
+    rules: http://localhost:8098/api/v1/zeus/rules/
 zeus-validation:
   api:
     version: 1.0.0

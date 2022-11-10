@@ -1,8 +1,9 @@
 package com.brihaspathee.zeus.validator.rules.impl;
 
-import com.brihaspathee.zeus.domain.entity.Rule;
-import com.brihaspathee.zeus.domain.entity.RuleTransaction;
+import com.brihaspathee.zeus.dto.rules.RuleDto;
+import com.brihaspathee.zeus.dto.rules.RuleTransactionDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
+import com.brihaspathee.zeus.dto.transaction.TransactionMemberDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionRateDto;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
 import com.brihaspathee.zeus.validator.rules.RuleMessage;
@@ -15,8 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created in Intellij IDEA
@@ -41,9 +43,9 @@ public class PremiumTotalRule implements TransactionRule {
     @Override
     public void execute(TransactionValidationResult transactionValidationResult,
                         TransactionDto transactionDto,
-                        Rule rule) {
+                        RuleDto rule) {
         log.info("About to execute the rate rule");
-        Set<RuleTransaction> transactionTypes = rule.getRuleTransactions();
+        List<RuleTransactionDto> transactionTypes = rule.getRuleTransactions();
         // check if the rule has to be executed for the transaction
         if(RuleUtil.doesRuleApply(transactionTypes,
                 transactionDto.getTransactionDetail().getTransactionTypeCode())){
@@ -55,6 +57,7 @@ public class PremiumTotalRule implements TransactionRule {
                     .ruleMessages(new ArrayList<RuleMessage>())
                     .build();
             checkPremiumTotalRuleOne(rateRule, transactionDto);
+            checkPremiumTotalRuleTwo(rateRule, transactionDto);
             // Check of all individual sub-rules with date of birth rule has passed
             RuleUtil.checkIfRulePassed(rateRule);
             transactionValidationResult.getRuleResults().add(rateRule);
@@ -118,5 +121,40 @@ public class PremiumTotalRule implements TransactionRule {
         }else{
             return;
         }
+    }
+
+    /**
+     * This rule checks the below equation
+     * PRE AMT TOT = Rates of the individual members
+     * @param rateRule
+     * @param transactionDto
+     */
+    private void checkPremiumTotalRuleTwo(RuleResult rateRule,
+                                          TransactionDto transactionDto){
+        Optional<TransactionRateDto> preAmt = transactionDto.getTransactionRates()
+                .stream()
+                .filter(
+                        rateDto -> rateDto.getRateTypeCode().equals("PREAMTTOT"))
+                .findFirst();
+        if(preAmt.isPresent()){
+            List<TransactionMemberDto> memberDtos = transactionDto.getMembers();
+            List<BigDecimal> memberRates =
+                    memberDtos.stream()
+                            .map(
+                                    memberDto -> memberDto.getMemberRate())
+                            .collect(Collectors.toList());
+            BigDecimal memberRateSum =
+                    memberRates.stream()
+                            .reduce(BigDecimal.ZERO, (p, q) -> p.add(q));
+            if(memberRateSum.compareTo(preAmt.get().getTransactionRate()) != 0){
+                rateRule.getRuleMessages()
+                        .add(RuleMessage.builder()
+                                .messageDescription("Sum of individual member rates not equal to premium amount total")
+                                .messageCode("1500008")
+                                .messageTypeCode("CRITICAL")
+                                .build());
+            }
+        }
+
     }
 }

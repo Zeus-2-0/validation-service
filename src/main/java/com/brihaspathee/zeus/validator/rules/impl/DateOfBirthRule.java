@@ -1,9 +1,9 @@
 package com.brihaspathee.zeus.validator.rules.impl;
 
-import com.brihaspathee.zeus.domain.entity.Rule;
-import com.brihaspathee.zeus.domain.entity.RuleTransaction;
 import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.account.MemberDto;
+import com.brihaspathee.zeus.dto.rules.RuleDto;
+import com.brihaspathee.zeus.dto.rules.RuleTransactionDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionMemberDto;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
@@ -46,7 +46,7 @@ public class DateOfBirthRule implements AccountRule, TransactionRule {
     @Override
     public void execute(AccountValidationResult accountValidationResult,
                         AccountDto accountDto,
-                        Rule rule) {
+                        RuleDto rule) {
         // Date of birth rule is a member level rule, so get all the members
         Set<MemberDto> memberDtos = accountDto.getMembers();
         memberDtos.stream().forEach(memberDto -> {
@@ -148,8 +148,8 @@ public class DateOfBirthRule implements AccountRule, TransactionRule {
     @Override
     public void execute(TransactionValidationResult transactionValidationResult,
                         TransactionDto transactionDto,
-                        Rule rule) {
-        Set<RuleTransaction> transactionTypes = rule.getRuleTransactions();
+                        RuleDto rule) {
+        List<RuleTransactionDto> transactionTypes = rule.getRuleTransactions();
         // check if the rule has to be executed for the transaction
         if(RuleUtil.doesRuleApply(transactionTypes,
                 transactionDto.getTransactionDetail().getTransactionTypeCode())){

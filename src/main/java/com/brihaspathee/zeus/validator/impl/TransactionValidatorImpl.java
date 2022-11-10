@@ -1,12 +1,12 @@
 package com.brihaspathee.zeus.validator.impl;
 
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
-import com.brihaspathee.zeus.domain.entity.RuleCategory;
-import com.brihaspathee.zeus.domain.entity.RuleSet;
+import com.brihaspathee.zeus.dto.rules.RuleCategoryDto;
+import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
-import com.brihaspathee.zeus.helper.interfaces.RuleCategoryHelper;
 import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
+import com.brihaspathee.zeus.service.interfaces.RuleService;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.MemberValidationResult;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -51,7 +50,7 @@ public class TransactionValidatorImpl implements TransactionValidator {
     /**
      * Get the rules that are to be executed
      */
-    private final RuleCategoryHelper ruleCategoryHelper;
+    private final RuleService ruleService;
 
     /**
      * The rule execution helper to save all the rules there were executed for the payload
@@ -68,9 +67,10 @@ public class TransactionValidatorImpl implements TransactionValidator {
     public Mono<ValidationResponse<TransactionValidationResult>> validateTransaction(PayloadTracker payloadTracker,
                                                                                      TransactionDto transactionDto) {
         log.info("Inside the transaction validator, the validators are:{}", this.transactionRuleSets);
-        // Get the list of all the rules for the account
-        RuleCategory ruleCategory = ruleCategoryHelper.getRuleCategory("TRANSACTION");
-        Set<RuleSet> ruleSets = ruleCategory.getRuleSets();
+        // Get the list of all the rules for the transaction
+        RuleCategoryDto ruleCategory = ruleService.getRules("TRANSACTION",
+                "BUSINESS_RULE");
+        List<RuleSetDto> ruleSets = ruleCategory.getRuleSets();
         // Create the transaction validation result object with the necessary members
         // so that the results of the rules for the transaction and for each member can be stored
         TransactionValidationResult transactionValidationResult =

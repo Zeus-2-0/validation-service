@@ -1,5 +1,7 @@
 package com.brihaspathee.zeus.validator.rulesets.impl;
 
+import com.brihaspathee.zeus.domain.entity.RuleImplementation;
+import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.rules.RuleDto;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
@@ -7,6 +9,7 @@ import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.exception.RuleImplNotFound;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
+import com.brihaspathee.zeus.validator.rules.RuleUtil;
 import com.brihaspathee.zeus.validator.rules.interfaces.AccountRule;
 import com.brihaspathee.zeus.validator.rules.interfaces.TransactionRule;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created in Intellij IDEA
@@ -59,16 +63,17 @@ public class DemographicRuleSet implements AccountRuleSet, TransactionRuleSet {
     @Override
     public void validate(AccountValidationResult accountValidationResult,
                          AccountDto accountDto,
-                         RuleSetDto ruleSet) {
+                         RuleSetDto ruleSet,
+                         RuleSetImplementation ruleSetImplementation) {
         log.info("Inside the account demographic rule set");
         // Get all the rules that are to be executed for validating the enrollment span
         List<RuleDto> demoRules = ruleSet.getRules();
         // Iterate through each rules
         demoRules.stream().forEach(rule -> {
             // Get the implementation name of the rule
-            String ruleImpl = rule.getRuleImplName();
+            String ruleImplName = RuleUtil.getRuleImplName(ruleSetImplementation, rule.getRuleId());
             // Get the implementation of the rule that is auto wired
-            AccountRule accountRule = accountRules.get(ruleImpl);
+            AccountRule accountRule = accountRules.get(ruleImplName);
             // Generate an exception if no implementation for the rule is found
             if(accountRule == null){
                 throw new RuleImplNotFound("No implementation found for rule " + rule.getRuleName());
@@ -87,7 +92,8 @@ public class DemographicRuleSet implements AccountRuleSet, TransactionRuleSet {
     @Override
     public void validate(TransactionValidationResult transactionValidationResult,
                          TransactionDto transactionDto,
-                         RuleSetDto ruleSet) {
+                         RuleSetDto ruleSet,
+                         RuleSetImplementation ruleSetImplementation) {
         log.info("Inside the transaction demographic rule set");
         // Get all the rules that are to be executed for validating the demographic details of the members in the
         // transaction
@@ -95,7 +101,7 @@ public class DemographicRuleSet implements AccountRuleSet, TransactionRuleSet {
         // Iterate through each rules
         demoRules.stream().forEach(rule -> {
             // Get the implementation name of the rule
-            String ruleImpl = rule.getRuleImplName();
+            String ruleImpl = RuleUtil.getRuleImplName(ruleSetImplementation, rule.getRuleId());;
             log.info("The rule:{}", ruleImpl);
             // Get the implementation of the rule that is auto wired
             TransactionRule transactionRule = transactionRules.get(ruleImpl);

@@ -1,8 +1,12 @@
 package com.brihaspathee.zeus.validator.rules;
 
+import com.brihaspathee.zeus.domain.entity.RuleImplementation;
+import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.rules.RuleTransactionDto;
+import com.brihaspathee.zeus.exception.RuleImplNotFound;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created in Intellij IDEA
@@ -44,5 +48,23 @@ public class RuleUtil {
                 ruleTransaction -> ruleTransaction.getTransactionTypeCode().equals(
                         transactionType));
         return doesRuleApply;
+    }
+
+    /**
+     * Get the name of the rule implementation
+     * @param ruleSetImplementation
+     * @param ruleId
+     * @return
+     */
+    public static String getRuleImplName(RuleSetImplementation ruleSetImplementation,
+                                         String ruleId){
+        Optional<RuleImplementation> ruleImplementation = ruleSetImplementation.getRuleImplementations().stream().filter(ruleImpl -> {
+            return ruleImpl.getRuleId().equals(ruleId);
+        }).findFirst();
+        if(ruleImplementation.isEmpty()){
+            throw new RuleImplNotFound("No implementation found for rule " + ruleId);
+        }else{
+            return ruleImplementation.get().getRuleImplName();
+        }
     }
 }

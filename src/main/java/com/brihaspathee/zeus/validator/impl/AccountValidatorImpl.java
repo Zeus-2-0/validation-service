@@ -1,11 +1,13 @@
 package com.brihaspathee.zeus.validator.impl;
 
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
+import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.rules.RuleCategoryDto;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
+import com.brihaspathee.zeus.helper.interfaces.RuleSetImplementationHelper;
 import com.brihaspathee.zeus.service.interfaces.RuleService;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
@@ -52,6 +54,11 @@ public class AccountValidatorImpl implements AccountValidator {
     private final RuleService ruleService;
 
     /**
+     * The rule set implementation helper instance to get the implementations for each ruleset
+     */
+    private final RuleSetImplementationHelper ruleSetImplementationHelper;
+
+    /**
      * The rule execution helper to save all the rules there were executed for the payload
      */
     private final RuleExecutionHelper ruleExecutionHelper;
@@ -77,8 +84,10 @@ public class AccountValidatorImpl implements AccountValidator {
         // Iterate through each rule set
         ruleSets.stream().forEach(ruleSet -> {
             log.info("Rule Set:{}", ruleSet);
-            // Get the implementation name of the rule set
-            String ruleSetImplementation = ruleSet.getRuleSetImplName();
+            // Get the implementation of the rule set
+            RuleSetImplementation ruleSetImplementation =
+                    ruleSetImplementationHelper.getRuleSetImplementation(ruleSet.getRuleSetId());
+            String ruleSetImplName = ruleSetImplementation.getRuleSetImplName();
             // Get the implementation class of the rule set that was auto wired
             AccountRuleSet accountRuleSet = accountRuleSets.get(ruleSetImplementation);
             // Generate an exception if no implementation is found for the rule
@@ -86,7 +95,7 @@ public class AccountValidatorImpl implements AccountValidator {
                 throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSet.getRuleSetName());
             }
             // Execute all the rules withing the rule set
-            accountRuleSet.validate(finalAccountValidationResult, accountDto, ruleSet);
+            accountRuleSet.validate(finalAccountValidationResult, accountDto, ruleSet, ruleSetImplementation);
         });
         // Once all the rules within the ruleset are executed check if any account or member level rules failed to
         // indicate if the validation of the account overall passed or failed

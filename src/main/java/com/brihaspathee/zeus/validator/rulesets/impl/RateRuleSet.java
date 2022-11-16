@@ -1,10 +1,12 @@
 package com.brihaspathee.zeus.validator.rulesets.impl;
 
+import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.rules.RuleDto;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.exception.RuleImplNotFound;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
+import com.brihaspathee.zeus.validator.rules.RuleUtil;
 import com.brihaspathee.zeus.validator.rules.interfaces.TransactionRule;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.TransactionRuleSet;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +47,8 @@ public class RateRuleSet implements TransactionRuleSet {
     @Override
     public void validate(TransactionValidationResult transactionValidationResult,
                          TransactionDto transactionDto,
-                         RuleSetDto ruleSet) {
+                         RuleSetDto ruleSet,
+                         RuleSetImplementation ruleSetImplementation) {
         log.info("Inside the transaction rate rule set");
         // Get all the rules that are to be executed for validating the demographic details of the members in the
         // transaction
@@ -53,7 +56,7 @@ public class RateRuleSet implements TransactionRuleSet {
         // Iterate through each rules
         rateRules.stream().forEach(rule -> {
             // Get the implementation name of the rule
-            String ruleImpl = rule.getRuleImplName();
+            String ruleImpl = RuleUtil.getRuleImplName(ruleSetImplementation, rule.getRuleId());;
             log.info("The rule:{}", ruleImpl);
             // Get the implementation of the rule that is auto wired
             TransactionRule transactionRule = transactionRules.get(ruleImpl);

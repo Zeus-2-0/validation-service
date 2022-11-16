@@ -1,3 +1,9 @@
+DROP TABLE IF EXISTS `validationdb`.`payload_tracker`;
+DROP TABLE IF EXISTS `validationdb`.`payload_tracker_detail`;
+DROP TABLE IF EXISTS `validationdb`.`rule_executed`;
+DROP TABLE IF EXISTS `validationdb`.`rule_execution_message`;
+DROP TABLE IF EXISTS `validationdb`.`rule_set_implementation`;
+DROP TABLE IF EXISTS `validationdb`.`rule_implementation`;
 CREATE TABLE IF NOT EXISTS `validationdb`.`payload_tracker` (
   `payload_tracker_sk` VARCHAR(36) NOT NULL,
   `payload_id` VARCHAR(45) NOT NULL,
@@ -61,3 +67,28 @@ CREATE TABLE IF NOT EXISTS `validationdb`.`rule_execution_message` (
     ON UPDATE NO ACTION)
     ENGINE = InnoDB
     COMMENT = 'The messages that are generated for the table';
+CREATE TABLE IF NOT EXISTS `validationdb`.`rule_set_implementation` (
+    `rule_set_impl_sk` VARCHAR(36) NOT NULL COMMENT 'The primary key of the table',
+    `rule_set_id` VARCHAR(50) NOT NULL COMMENT 'The unique id for the rule set',
+    `rule_set_impl_name` VARCHAR(100) NOT NULL COMMENT 'The implementation name for the rule set',
+    `created_date` DATETIME NULL COMMENT 'The date when the record was created',
+    `updated_date` DATETIME NULL COMMENT 'The date when the record was updated',
+    PRIMARY KEY (`rule_set_impl_sk`))
+    ENGINE = InnoDB
+    COMMENT = 'This table contains the implementation for each rule set';
+CREATE TABLE IF NOT EXISTS `validationdb`.`rule_implementation` (
+    `rule_impl_sk` VARCHAR(36) NOT NULL COMMENT 'Primary key of the table',
+    `rule_set_impl_sk` VARCHAR(45) NOT NULL COMMENT 'Rule set that the rule belongs',
+    `rule_id` VARCHAR(50) NOT NULL COMMENT 'The id of the rule',
+    `rule_impl_name` VARCHAR(100) NOT NULL COMMENT 'The implementation for the rule',
+    `created_date` DATETIME NULL COMMENT 'Date when the record was created',
+    `updated_date` DATETIME NULL COMMENT 'Date when the record was updated',
+    PRIMARY KEY (`rule_impl_sk`),
+    INDEX `rule_set_imp_fk_idx` (`rule_set_impl_sk` ASC) VISIBLE,
+    CONSTRAINT `rule_set_imp_fk`
+    FOREIGN KEY (`rule_set_impl_sk`)
+    REFERENCES `validationdb`.`rule_set_implementation` (`rule_set_impl_sk`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+    ENGINE = InnoDB
+    COMMENT = 'This table contains the implementation names for each rule';

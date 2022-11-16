@@ -73,6 +73,7 @@ public class TransactionValidationListener {
      */
     private final TransactionValidationSubscriber transactionValidationSubscriber;
 
+
     /**
      * kafka consumer to consume the messages
      * @param consumerRecord
@@ -125,21 +126,28 @@ public class TransactionValidationListener {
                                            PayloadTracker payloadTracker) throws JsonProcessingException{
         log.info(messagePayload.getPayload().getZtcn());
         TransactionDto transactionDto = messagePayload.getPayload();
+//        transactionValidator
+//                .validateTransaction(payloadTracker, transactionDto)
+//                .subscribe(transactionValidationSubscriber);
         transactionValidator
                 .validateTransaction(payloadTracker, transactionDto)
-                .subscribe(transactionValidationSubscriber);
-//        ValidationResponse<TransactionValidationResult> transactionValidationResults =
-//                ValidationResponse.<TransactionValidationResult>builder()
-//                        .payloadTracker(payloadTracker)
-//                        .validationResult(TransactionValidationResult.builder()
-//                                .responseId(ZeusRandomStringGenerator.randomString(15))
-//                                .requestPayloadId(payloadTracker.getPayloadId())
-//                                .ztcn(messagePayload.getPayload().getZtcn())
-//                                .validationPassed(true)
-//                                .build())
-//                        .build();
-//        // This will save the response detail in the payload tracker detail and send the message
-//        transactionValidationResultProducer.sendAccountValidationResult(transactionValidationResults);
+                .subscribe(
+                        // Action to be taken when the results of the validation is received successfully
+                        transactionValidationResult -> {
+                            try{
+                                transactionValidationResultProducer.sendAccountValidationResult(transactionValidationResult);
+                            }catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        // Action to be taken if there is any error during the validation process
+                        throwable -> {
+                            log.info(throwable.getMessage());
+                        },
+                        // Action to be taken when the whole process is completed
+                        () -> {
+                            log.info("The result is produced and sent to transaction manager service");
+                        });
 
     }
 

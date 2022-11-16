@@ -1,10 +1,12 @@
 package com.brihaspathee.zeus.validator.rulesets.impl;
 
+import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.rules.RuleDto;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.validator.AccountValidationResult;
+import com.brihaspathee.zeus.validator.rules.RuleUtil;
 import com.brihaspathee.zeus.validator.rules.interfaces.AccountRule;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.AccountRuleSet;
 import lombok.RequiredArgsConstructor;
@@ -47,14 +49,15 @@ public class EnrollmentSpanRuleSet implements AccountRuleSet {
     @Override
     public void validate(AccountValidationResult accountValidationResult,
                          AccountDto accountDto,
-                         RuleSetDto ruleSet) {
+                         RuleSetDto ruleSet,
+                         RuleSetImplementation ruleSetImplementation) {
         log.info("Inside the demographic rule set");
         // Get all the rules that are to be executed for validating the enrollment span
         List<RuleDto> enrollmentSpanRules = ruleSet.getRules();
         // Iterate through each rules
         enrollmentSpanRules.stream().forEach(rule -> {
             // Get the implementation name of the rule
-            String ruleImpl = rule.getRuleImplName();
+            String ruleImpl = RuleUtil.getRuleImplName(ruleSetImplementation, rule.getRuleId());;
             // Get the implementation of the rule that is auto wired
             AccountRule accountRule = accountRules.get(ruleImpl);
             // Generate an exception if no implementation for the rule is found

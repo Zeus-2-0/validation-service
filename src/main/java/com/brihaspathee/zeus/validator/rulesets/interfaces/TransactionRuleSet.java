@@ -1,5 +1,6 @@
 package com.brihaspathee.zeus.validator.rulesets.interfaces;
 
+import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
@@ -23,5 +24,6 @@ public interface TransactionRuleSet {
      */
     void validate(TransactionValidationResult transactionValidationResult,
                   TransactionDto transactionDto,
-                  RuleSetDto ruleSet);
+                  RuleSetDto ruleSet,
+                  RuleSetImplementation ruleSetImplementation);
 }

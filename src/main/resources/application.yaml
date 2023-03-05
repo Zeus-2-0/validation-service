@@ -23,6 +23,7 @@ spring:
   flyway:
     user: validationadmin
     password: password
+    clean-disabled: false
   kafka:
     # bootstrap-servers: localhost:9092
     producer:

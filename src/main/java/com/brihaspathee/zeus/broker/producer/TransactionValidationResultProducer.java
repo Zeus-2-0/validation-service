@@ -80,7 +80,7 @@ public class TransactionValidationResultProducer {
         ProducerRecord<String, ZeusMessagePayload<TransactionValidationResult>> producerRecord =
                 buildProducerRecord(payloadTrackerDetail.getResponsePayloadId(), messagePayload);
         // Send to kafka topic
-        kafkaTemplate.send(producerRecord).addCallback(transactionValidationResultCallback);
+        kafkaTemplate.send(producerRecord);//.addCallback(transactionValidationResultCallback);
         log.info("After the sending the validation response to member management service is called");
     }
 

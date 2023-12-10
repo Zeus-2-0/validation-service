@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>/Users/balaji/Documents/mac-mini/Projects.nosync/Zeus/validation-service/src/main/java/com/brihaspathee/zeus/service</OriginalElement>
+  <nodes>
+    <node x="-112.0" y="108.0">com.brihaspathee.zeus.service.interfaces.RuleService</node>
+    <node x="-152.0" y="-68.0">com.brihaspathee.zeus.service.impl.RuleServiceImpl</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.brihaspathee.zeus.service.impl.RuleServiceImpl" target="com.brihaspathee.zeus.service.interfaces.RuleService" relationship="REALIZATION">
+      <point x="40.0" y="68.0" />
+      <point x="0.0" y="-31.5" />
+    </edge>
+  </edges>
+  <settings layout="Compact" zoom="1.0" showDependencies="false" x="20.0" y="51.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

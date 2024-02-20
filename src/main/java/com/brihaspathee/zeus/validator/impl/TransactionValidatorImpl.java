@@ -4,6 +4,7 @@ import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.rules.RuleCategoryDto;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
+import com.brihaspathee.zeus.dto.rules.RuleTypeDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
@@ -77,39 +78,45 @@ public class TransactionValidatorImpl implements TransactionValidator {
         // Get the list of all the rules for the transaction
         RuleCategoryDto ruleCategory = ruleService.getRules("TRANSACTION",
                 "BUSINESS_RULE");
-        List<RuleSetDto> ruleSets = ruleCategory.getRuleSets();
-        // Create the transaction validation result object with the necessary members
-        // so that the results of the rules for the transaction and for each member can be stored
-        TransactionValidationResult transactionValidationResult =
-                constructTransactionValidationResult(payloadTracker, transactionDto);
-        // Iterate through each rule set
-        ruleSets.stream().forEach(ruleSet -> {
-            log.info("Rule Set:{}", ruleSet);
-            // Get the implementation of the rule set
-            RuleSetImplementation ruleSetImplementation =
-                    ruleSetImplementationHelper.getRuleSetImplementation(ruleSet.getRuleSetId());
-            String ruleSetImplName = ruleSetImplementation.getRuleSetImplName();
-            // Get the implementation class of the rule set that was auto wired
-            TransactionRuleSet transactionRuleSet = transactionRuleSets.get(ruleSetImplName);
-            // Generate an exception if no implementation is found for the rule
-            if(transactionRuleSet == null){
-                throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSet.getRuleSetName());
-            }
-            // Execute all the rules withing the rule set
-            transactionRuleSet.validate(transactionValidationResult, transactionDto, ruleSet, ruleSetImplementation);
-        });
-        // Once all the rules within the ruleset are executed check if any transaction or member level rules failed to
-        // indicate if the validation of the account overall passed or failed
-        checkIfValidationPassed(transactionValidationResult);
-        log.info("Final Transaction Validation Result:{}", transactionValidationResult);
-        saveExecutedRules(payloadTracker, transactionValidationResult);
-        // Send the results back
-        ValidationResponse<TransactionValidationResult> validationResponse =
-                ValidationResponse.<TransactionValidationResult>builder()
-                        .payloadTracker(payloadTracker)
-                        .validationResult(transactionValidationResult)
-                        .build();
-        return Mono.just(validationResponse).delayElement(Duration.ofSeconds(5));
+        ValidationResponse<TransactionValidationResult> validationResponse = null;
+        if(ruleCategory.getRuleTypes() != null && !ruleCategory.getRuleTypes().isEmpty()){
+            RuleTypeDto businessRuleType = ruleCategory.getRuleTypes().get(0);
+            List<RuleSetDto> ruleSets = businessRuleType.getRuleSets();
+            // Create the transaction validation result object with the necessary members
+            // so that the results of the rules for the transaction and for each member can be stored
+            TransactionValidationResult transactionValidationResult =
+                    constructTransactionValidationResult(payloadTracker, transactionDto);
+            // Iterate through each rule set
+            ruleSets.stream().forEach(ruleSet -> {
+                log.info("Rule Set:{}", ruleSet);
+                // Get the implementation of the rule set
+                RuleSetImplementation ruleSetImplementation =
+                        ruleSetImplementationHelper.getRuleSetImplementation(ruleSet.getRuleSetId());
+                String ruleSetImplName = ruleSetImplementation.getRuleSetImplName();
+                // Get the implementation class of the rule set that was auto wired
+                TransactionRuleSet transactionRuleSet = transactionRuleSets.get(ruleSetImplName);
+                // Generate an exception if no implementation is found for the rule
+                if(transactionRuleSet == null){
+                    throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSet.getRuleSetName());
+                }
+                // Execute all the rules withing the rule set
+                transactionRuleSet.validate(transactionValidationResult, transactionDto, ruleSet, ruleSetImplementation);
+            });
+            // Once all the rules within the ruleset are executed check if any transaction or member level rules failed to
+            // indicate if the validation of the account overall passed or failed
+            checkIfValidationPassed(transactionValidationResult);
+            log.info("Final Transaction Validation Result:{}", transactionValidationResult);
+            saveExecutedRules(payloadTracker, transactionValidationResult);
+            // Send the results back
+            validationResponse =
+                    ValidationResponse.<TransactionValidationResult>builder()
+                            .payloadTracker(payloadTracker)
+                            .validationResult(transactionValidationResult)
+                            .build();
+
+        }
+        return Mono.justOrEmpty(validationResponse).delayElement(Duration.ofSeconds(5));
+
     }
 
     /**

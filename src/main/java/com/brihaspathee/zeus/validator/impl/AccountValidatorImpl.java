@@ -5,6 +5,7 @@ import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
 import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.rules.RuleCategoryDto;
 import com.brihaspathee.zeus.dto.rules.RuleSetDto;
+import com.brihaspathee.zeus.dto.rules.RuleTypeDto;
 import com.brihaspathee.zeus.exception.RuleSetImplNotFound;
 import com.brihaspathee.zeus.helper.interfaces.RuleExecutionHelper;
 import com.brihaspathee.zeus.helper.interfaces.RuleSetImplementationHelper;
@@ -76,40 +77,43 @@ public class AccountValidatorImpl implements AccountValidator {
         // Get the list of all the rules for the account
         RuleCategoryDto ruleCategory = ruleService.getRules("ACCOUNT",
                 "ACCOUNT_RULE");
-        List<RuleSetDto> ruleSets = ruleCategory.getRuleSets();
-        // Create the account validation result object with the necessary members
-        // so that the results of the rules for the account and for each member can be stored
-        AccountValidationResult finalAccountValidationResult =
-                constructAccountValidationResult(payloadTracker, accountDto);
-        // Iterate through each rule set
-        ruleSets.stream().forEach(ruleSet -> {
-            log.info("Rule Set:{}", ruleSet);
-            // Get the implementation of the rule set
-            RuleSetImplementation ruleSetImplementation =
-                    ruleSetImplementationHelper.getRuleSetImplementation(ruleSet.getRuleSetId());
-            String ruleSetImplName = ruleSetImplementation.getRuleSetImplName();
-            // Get the implementation class of the rule set that was auto wired
-            AccountRuleSet accountRuleSet = accountRuleSets.get(ruleSetImplementation);
-            // Generate an exception if no implementation is found for the rule
-            if(accountRuleSet == null){
-                throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSet.getRuleSetName());
-            }
-            // Execute all the rules withing the rule set
-            accountRuleSet.validate(finalAccountValidationResult, accountDto, ruleSet, ruleSetImplementation);
-        });
-        // Once all the rules within the ruleset are executed check if any account or member level rules failed to
-        // indicate if the validation of the account overall passed or failed
-        checkIfValidationPassed(finalAccountValidationResult);
-        log.info("Final Account Validation Result:{}", finalAccountValidationResult);
-        saveExecutedRules(payloadTracker,finalAccountValidationResult);
-        // Send the results back
-        ValidationResponse<AccountValidationResult> validationResponse =
-                ValidationResponse.<AccountValidationResult>builder()
-                        .payloadTracker(payloadTracker)
-                        .validationResult(finalAccountValidationResult)
-                        .build();
-
-        return Mono.just(validationResponse).delayElement(Duration.ofSeconds(5));
+        ValidationResponse<AccountValidationResult> validationResponse = null;
+        if(ruleCategory.getRuleTypes() != null && !ruleCategory.getRuleTypes().isEmpty()){
+            RuleTypeDto accountRuleType = ruleCategory.getRuleTypes().get(0);
+            List<RuleSetDto> ruleSets = accountRuleType.getRuleSets();
+            // Create the account validation result object with the necessary members
+            // so that the results of the rules for the account and for each member can be stored
+            AccountValidationResult finalAccountValidationResult =
+                    constructAccountValidationResult(payloadTracker, accountDto);
+            // Iterate through each rule set
+            ruleSets.stream().forEach(ruleSet -> {
+                log.info("Rule Set:{}", ruleSet);
+                // Get the implementation of the rule set
+                RuleSetImplementation ruleSetImplementation =
+                        ruleSetImplementationHelper.getRuleSetImplementation(ruleSet.getRuleSetId());
+                String ruleSetImplName = ruleSetImplementation.getRuleSetImplName();
+                // Get the implementation class of the rule set that was auto wired
+                AccountRuleSet accountRuleSet = accountRuleSets.get(ruleSetImplementation);
+                // Generate an exception if no implementation is found for the rule
+                if(accountRuleSet == null){
+                    throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSet.getRuleSetName());
+                }
+                // Execute all the rules withing the rule set
+                accountRuleSet.validate(finalAccountValidationResult, accountDto, ruleSet, ruleSetImplementation);
+            });
+            // Once all the rules within the ruleset are executed check if any account or member level rules failed to
+            // indicate if the validation of the account overall passed or failed
+            checkIfValidationPassed(finalAccountValidationResult);
+            log.info("Final Account Validation Result:{}", finalAccountValidationResult);
+            saveExecutedRules(payloadTracker,finalAccountValidationResult);
+            // Send the results back
+            validationResponse =
+                    ValidationResponse.<AccountValidationResult>builder()
+                            .payloadTracker(payloadTracker)
+                            .validationResult(finalAccountValidationResult)
+                            .build();
+        }
+        return Mono.justOrEmpty(validationResponse).delayElement(Duration.ofSeconds(5));
     }
 
     /**

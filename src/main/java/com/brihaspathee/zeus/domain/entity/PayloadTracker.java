@@ -1,5 +1,6 @@
 package com.brihaspathee.zeus.domain.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -83,13 +84,13 @@ public class PayloadTracker {
     /**
      * The detail tracker of the payload
      */
-    @OneToMany(mappedBy = "payloadTracker", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "payloadTracker", cascade = CascadeType.REMOVE)
     private Set<PayloadTrackerDetail> payloadTrackerDetails;
 
     /**
      * The list of rules that were executed for the payload
      */
-    @OneToMany(mappedBy = "payloadTracker", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "payloadTracker", cascade = CascadeType.REMOVE)
     private Set<RuleExecuted> rulesExecuted;
 
     /**

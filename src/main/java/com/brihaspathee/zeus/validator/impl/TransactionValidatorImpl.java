@@ -19,11 +19,15 @@ import com.brihaspathee.zeus.validator.rules.RuleResult;
 import com.brihaspathee.zeus.validator.rulesets.interfaces.TransactionRuleSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -66,18 +70,24 @@ public class TransactionValidatorImpl implements TransactionValidator {
     private final RuleExecutionHelper ruleExecutionHelper;
 
     /**
+     * The environment in which the service is running
+     */
+    private final Environment environment;
+    /**
      * Validate the transaction
      * @param payloadTracker
      * @param transactionDto
      * @return
      */
+    @Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
     @Override
     public Mono<ValidationResponse<TransactionValidationResult>> validateTransaction(PayloadTracker payloadTracker,
                                                                                      TransactionDto transactionDto) {
         log.info("Inside the transaction validator, the validators are:{}", this.transactionRuleSets);
         // Get the list of all the rules for the transaction
         RuleCategoryDto ruleCategory = ruleService.getRules("TRANSACTION",
-                "BUSINESS_RULE");
+                "TRANSACTION_DATA_VALIDATION");
+        log.info("Rule Category Dto received from rule service:{}", ruleCategory);
         ValidationResponse<TransactionValidationResult> validationResponse = null;
         if(ruleCategory.getRuleTypes() != null && !ruleCategory.getRuleTypes().isEmpty()){
             RuleTypeDto businessRuleType = ruleCategory.getRuleTypes().get(0);
@@ -87,7 +97,7 @@ public class TransactionValidatorImpl implements TransactionValidator {
             TransactionValidationResult transactionValidationResult =
                     constructTransactionValidationResult(payloadTracker, transactionDto);
             // Iterate through each rule set
-            ruleSets.stream().forEach(ruleSet -> {
+            ruleSets.forEach(ruleSet -> {
                 log.info("Rule Set:{}", ruleSet);
                 // Get the implementation of the rule set
                 RuleSetImplementation ruleSetImplementation =
@@ -107,6 +117,9 @@ public class TransactionValidatorImpl implements TransactionValidator {
             checkIfValidationPassed(transactionValidationResult);
             log.info("Final Transaction Validation Result:{}", transactionValidationResult);
             saveExecutedRules(payloadTracker, transactionValidationResult);
+            if(Arrays.asList(environment.getActiveProfiles()).contains("int-test")){
+                transactionValidationResult.setTestTransactionDto(transactionDto);
+            }
             // Send the results back
             validationResponse =
                     ValidationResponse.<TransactionValidationResult>builder()
@@ -115,7 +128,8 @@ public class TransactionValidatorImpl implements TransactionValidator {
                             .build();
 
         }
-        return Mono.justOrEmpty(validationResponse).delayElement(Duration.ofSeconds(5));
+        return Mono.justOrEmpty(validationResponse);
+        //return Mono.justOrEmpty(validationResponse).delayElement(Duration.ofSeconds(5));
 
     }
 

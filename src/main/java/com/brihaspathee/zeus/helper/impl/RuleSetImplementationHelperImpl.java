@@ -36,9 +36,7 @@ public class RuleSetImplementationHelperImpl implements RuleSetImplementationHel
     public RuleSetImplementation getRuleSetImplementation(String ruleSetId) {
         RuleSetImplementation ruleSetImplementation =
                 repository.findRuleSetImplementationByRuleSetId(ruleSetId).orElseThrow(() ->
-                        {
-                            throw new RuleSetImplNotFound("No implementation found for rule set " + ruleSetId);
-                        });
+                        new RuleSetImplNotFound("No implementation found for rule set id " + ruleSetId));
         return ruleSetImplementation;
     }
 }

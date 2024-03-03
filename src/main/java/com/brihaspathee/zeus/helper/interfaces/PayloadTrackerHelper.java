@@ -26,4 +26,9 @@ public interface PayloadTrackerHelper {
      * @return
      */
     PayloadTracker getPayloadTracker(String payloadId);
+
+    /**
+     * Delete all payload tracker information
+     */
+    void deleteAll();
 }

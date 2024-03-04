@@ -58,8 +58,8 @@ public class TransactionValidationResultProducer {
      * Send the account validation result back to member management service
      * @param validationResponse
      */
-    public void sendAccountValidationResult(ValidationResponse<TransactionValidationResult> validationResponse) throws JsonProcessingException {
-        log.info("Inside the account validation producer:{}", validationResponse);
+    public void sendTransactionValidationResult(ValidationResponse<TransactionValidationResult> validationResponse) throws JsonProcessingException {
+        log.info("Inside the transaction validation producer:{}", validationResponse);
 
         // Create the result payload that is to be sent to the member management service
         String[] messageDestinations = {"TRANSACTION-MANAGER"};
@@ -81,7 +81,7 @@ public class TransactionValidationResultProducer {
                 buildProducerRecord(payloadTrackerDetail.getResponsePayloadId(), messagePayload);
         // Send to kafka topic
         kafkaTemplate.send(producerRecord);//.addCallback(transactionValidationResultCallback);
-        log.info("After the sending the validation response to member management service is called");
+        log.info("After the sending the validation response to transaction manager service is called");
     }
 
     /**

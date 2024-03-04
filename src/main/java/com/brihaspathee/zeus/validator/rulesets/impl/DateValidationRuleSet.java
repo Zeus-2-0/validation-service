@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 /**
  * Created in Intellij IDEA
  * User: Balaji Varadharajan
- * Date: 17, February 2024
- * Time: 6:05 AM
+ * Date: 23, February 2024
+ * Time: 5:20 AM
  * Project: Zeus
  * Package Name: com.brihaspathee.zeus.validator.rulesets.impl
  * To change this template use File | Settings | File and Code Template
@@ -22,13 +22,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Qualifier("transactionDateRuleSet")
-public class TransactionDateRuleSet implements TransactionRuleSet {
+@Qualifier("dataIntegrityRuleSet")
+public class DateValidationRuleSet implements TransactionRuleSet {
+
+    /**
+     * Perform the validations of the date from the rule set
+     * @param transactionValidationResult
+     * @param transactionDto
+     * @param ruleSet
+     * @param ruleSetImplementation
+     */
     @Override
     public void validate(TransactionValidationResult transactionValidationResult,
                          TransactionDto transactionDto,
                          RuleSetDto ruleSet,
                          RuleSetImplementation ruleSetImplementation) {
-        log.info("test");
+
     }
 }

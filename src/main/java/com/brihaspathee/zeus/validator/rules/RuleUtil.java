@@ -1,10 +1,18 @@
 package com.brihaspathee.zeus.validator.rules;
 
+import com.brihaspathee.zeus.constants.MessageType;
 import com.brihaspathee.zeus.domain.entity.RuleImplementation;
 import com.brihaspathee.zeus.domain.entity.RuleSetImplementation;
+import com.brihaspathee.zeus.dto.rules.RuleDto;
 import com.brihaspathee.zeus.dto.rules.RuleTransactionDto;
+import com.brihaspathee.zeus.dto.transaction.TransactionDto;
+import com.brihaspathee.zeus.dto.transaction.TransactionMemberDto;
+import com.brihaspathee.zeus.dto.transaction.TransactionMemberIdentifierDto;
 import com.brihaspathee.zeus.exception.RuleImplNotFound;
+import com.brihaspathee.zeus.validator.MemberValidationResult;
+import com.brihaspathee.zeus.validator.TransactionValidationResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +35,8 @@ public class RuleUtil {
     public static void checkIfRulePassed(RuleResult ruleResult){
         long numberOfCriticalAndErrors = ruleResult.getRuleMessages().stream()
                 .filter(ruleMessage ->
-                        ruleMessage.getMessageTypeCode().equals("CRITICAL") ||
-                                ruleMessage.getMessageCode().equals("ERROR")).count();
+                        ruleMessage.getMessageTypeCode().equals(MessageType.CRITICAL.toString()) ||
+                                ruleMessage.getMessageCode().equals(MessageType.ERROR.toString())).count();
         if(numberOfCriticalAndErrors == 0){
             ruleResult.setRulePassed(true);
         }else{
@@ -66,5 +74,68 @@ public class RuleUtil {
         }else{
             return ruleImplementation.get().getRuleImplName();
         }
+    }
+
+    /**
+     * Identify the member validation result
+     * @param memberDto
+     * @param transactionValidationResult
+     * @return
+     */
+    public static MemberValidationResult getMemberValidationResult(TransactionMemberDto memberDto,
+                                                                   TransactionValidationResult transactionValidationResult){
+        return transactionValidationResult
+                .getMemberValidationResults()
+                .stream()
+                .filter(
+                        temp ->
+                                temp.getMemberCode()
+                                        .equals(memberDto.getTransactionMemberCode()))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    /**
+     * Create the rule result object based on the rule
+     * @param rule
+     * @return
+     */
+    public static RuleResult createRuleResult(RuleDto rule){
+        return RuleResult.builder()
+                .ruleId(rule.getRuleId())
+                .ruleName(rule.getRuleName())
+                .ruleMessages(new ArrayList<RuleMessage>())
+                .build();
+    }
+
+    /**
+     * Get the identifier type
+     * @param transactionMemberDto
+     * @param identifierType
+     * @return
+     */
+    public static TransactionMemberIdentifierDto getMemberId(TransactionMemberDto transactionMemberDto, String identifierType){
+        return transactionMemberDto.getIdentifiers()
+                .stream()
+                .filter(
+                        transactionMemberIdentifierDto ->
+                                transactionMemberIdentifierDto.getIdentifierTypeCode().equals(identifierType))
+                .findFirst()
+                .orElse(null);
+
+    }
+
+    /**
+     * Get primary subscriber from the transaction
+     * @param transactionDto
+     * @return
+     */
+    public static TransactionMemberDto getPrimarySubscriber(TransactionDto transactionDto){
+        return transactionDto.getMembers()
+                .stream()
+                .filter(transactionMemberDto ->
+                        transactionMemberDto.getRelationshipTypeCode().equals("HOH"))
+                .findFirst()
+                .orElse(null);
     }
 }

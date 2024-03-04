@@ -54,7 +54,7 @@ public class RuleSetImplementation {
     /**
      * List of all the rule implementations for the rules within the rule set
      */
-    @OneToMany(mappedBy = "ruleSetImplementation", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "ruleSetImplementation")
     private List<RuleImplementation> ruleImplementations;
 
     /**

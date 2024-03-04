@@ -39,7 +39,7 @@ public class TransactionValidationSubscriber<T> extends BaseSubscriber<T> {
                 (ValidationResponse<TransactionValidationResult>) value;
         log.info("Validation Result:{}", validationResponse.getValidationResult().getZtcn());
         try{
-            transactionValidationResultProducer.sendAccountValidationResult(validationResponse);
+            transactionValidationResultProducer.sendTransactionValidationResult(validationResponse);
         }catch (JsonProcessingException e) {
             e.printStackTrace();
         }

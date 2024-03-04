@@ -3,7 +3,6 @@ package com.brihaspathee.zeus.broker.consumer;
 import com.brihaspathee.zeus.broker.producer.TransactionValidationResultProducer;
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.PayloadTrackerDetail;
-import com.brihaspathee.zeus.dto.account.AccountDto;
 import com.brihaspathee.zeus.dto.transaction.TransactionDto;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerHelper;
@@ -12,8 +11,6 @@ import com.brihaspathee.zeus.message.MessageMetadata;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
 import com.brihaspathee.zeus.subscriber.TransactionValidationSubscriber;
 import com.brihaspathee.zeus.util.ZeusRandomStringGenerator;
-import com.brihaspathee.zeus.validator.TransactionValidationResult;
-import com.brihaspathee.zeus.validator.ValidationResponse;
 import com.brihaspathee.zeus.validator.interfaces.TransactionValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -109,7 +106,7 @@ public class TransactionValidationListener {
         // Perform validations
         performTransactionValidations(messagePayload, payloadTracker);
 
-        log.info("After the call to validate the account");
+        log.info("After the call to validate the transaction");
 
         return ack;
     }
@@ -135,7 +132,9 @@ public class TransactionValidationListener {
                         // Action to be taken when the results of the validation is received successfully
                         transactionValidationResult -> {
                             try{
-                                transactionValidationResultProducer.sendAccountValidationResult(transactionValidationResult);
+                                log.info("Inside the subscribe function");
+                                log.info("Transaction validation result:{}", transactionValidationResult);
+                                transactionValidationResultProducer.sendTransactionValidationResult(transactionValidationResult);
                             }catch (JsonProcessingException e) {
                                 e.printStackTrace();
                             }

@@ -51,7 +51,7 @@ public class EnrollmentSpanRuleSet implements AccountRuleSet {
                          AccountDto accountDto,
                          RuleSetDto ruleSet,
                          RuleSetImplementation ruleSetImplementation) {
-        log.info("Inside the demographic rule set");
+        log.info("Inside the Enrollment span rule set");
         // Get all the rules that are to be executed for validating the enrollment span
         List<RuleDto> enrollmentSpanRules = ruleSet.getRules();
         // Iterate through each rules

@@ -1,5 +1,6 @@
 package com.brihaspathee.zeus.domain.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -8,6 +9,7 @@ import jakarta.persistence.*;
 
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -56,6 +58,12 @@ public class RuleExecuted {
      */
     @Column(name = "rule_passed", nullable = false)
     private boolean rulePassed;
+
+    /**
+     * The list of messages that were created for the rule
+     */
+    @OneToMany(mappedBy = "ruleExecuted", cascade = CascadeType.REMOVE)
+    private Set<RuleExecutionMessage> ruleExecutionMessages;
 
     /**
      * Date when the record was created

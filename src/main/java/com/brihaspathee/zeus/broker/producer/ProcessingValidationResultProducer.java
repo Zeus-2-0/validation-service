@@ -1,5 +1,6 @@
 package com.brihaspathee.zeus.broker.producer;
 
+import com.brihaspathee.zeus.constants.ZeusServiceNames;
 import com.brihaspathee.zeus.domain.entity.PayloadTracker;
 import com.brihaspathee.zeus.domain.entity.PayloadTrackerDetail;
 import com.brihaspathee.zeus.helper.interfaces.PayloadTrackerDetailHelper;
@@ -7,6 +8,7 @@ import com.brihaspathee.zeus.message.MessageMetadata;
 import com.brihaspathee.zeus.message.ZeusMessagePayload;
 import com.brihaspathee.zeus.validator.TransactionValidationResult;
 import com.brihaspathee.zeus.validator.ValidationResponse;
+import com.brihaspathee.zeus.validator.result.ProcessingValidationResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,8 @@ import java.util.Arrays;
 /**
  * Created in Intellij IDEA
  * User: Balaji Varadharajan
- * Date: 13, October 2022
- * Time: 7:24 AM
+ * Date: 03, April 2024
+ * Time: 11:15 AM
  * Project: Zeus
  * Package Name: com.brihaspathee.zeus.broker.producer
  * To change this template use File | Settings | File and Code Template
@@ -32,12 +34,12 @@ import java.util.Arrays;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TransactionValidationResultProducer {
+public class ProcessingValidationResultProducer {
 
     /**
      * Kafka template to produce and send messages
      */
-    private final KafkaTemplate<String, ZeusMessagePayload<TransactionValidationResult>> kafkaTemplate;
+    private final KafkaTemplate<String, ZeusMessagePayload<ProcessingValidationResult>> kafkaTemplate;
 
     /**
      * Object mapper that can covert the object into a string
@@ -52,20 +54,19 @@ public class TransactionValidationResultProducer {
     /**
      * ListenableFutureCallback class that is used after success or failure of publishing the message
      */
-    private final TransactionValidationResultCallback transactionValidationResultCallback;
+    private final ProcessingValidationResultCallback processingValidationResultCallback;
 
     /**
-     * Send the transaction validation result back to transaction manager service
+     * Send the processing validation result back to the account processing service
      * @param validationResponse
      */
-    public void sendTransactionValidationResult(ValidationResponse<TransactionValidationResult> validationResponse) throws JsonProcessingException {
-        log.info("Inside the transaction validation producer:{}", validationResponse);
-
+    public void sendProcessingValidationResult(ValidationResponse<ProcessingValidationResult> validationResponse) throws JsonProcessingException {
+        log.info("Inside the processing validation producer:{}", validationResponse.getValidationResult());
         // Create the result payload that is to be sent to the member management service
-        String[] messageDestinations = {"TRANSACTION-MANAGER"};
-        ZeusMessagePayload<TransactionValidationResult> messagePayload = ZeusMessagePayload.<TransactionValidationResult>builder()
+        String[] messageDestinations = {ZeusServiceNames.ACCOUNT_PROCESSOR_SERVICE};
+        ZeusMessagePayload<ProcessingValidationResult> messagePayload = ZeusMessagePayload.<ProcessingValidationResult>builder()
                 .messageMetadata(MessageMetadata.builder()
-                        .messageSource("VALIDATION-SERVICE")
+                        .messageSource(ZeusServiceNames.VALIDATION_SERVICE)
                         .messageDestination(messageDestinations)
                         .messageCreationTimestamp(LocalDateTime.now())
                         .build())
@@ -75,13 +76,14 @@ public class TransactionValidationResultProducer {
         PayloadTrackerDetail payloadTrackerDetail = createPayloadTrackerDetail(
                 validationResponse.getPayloadTracker(),
                 messagePayload);
-        transactionValidationResultCallback.setValidationResult(validationResponse.getValidationResult());
+        processingValidationResultCallback.setProcessingValidationResult(validationResponse.getValidationResult());
+        log.info("Processing Validation Result to be sent back:{}", messagePayload.getPayload());
         // Build the producer record
-        ProducerRecord<String, ZeusMessagePayload<TransactionValidationResult>> producerRecord =
-                buildProducerRecord(payloadTrackerDetail.getResponsePayloadId(), messagePayload);
+        ProducerRecord<String, ZeusMessagePayload<ProcessingValidationResult>> producerRecord =
+                buildProducerRecord("Test Payload id", messagePayload);
         // Send to kafka topic
         kafkaTemplate.send(producerRecord);//.addCallback(transactionValidationResultCallback);
-        log.info("After the sending the validation response to transaction manager service is called");
+        log.info("After the sending the validation response to account processing service is called");
     }
 
     /**
@@ -93,7 +95,7 @@ public class TransactionValidationResultProducer {
      */
     private PayloadTrackerDetail createPayloadTrackerDetail(
             PayloadTracker payloadTracker,
-            ZeusMessagePayload<TransactionValidationResult> messagePayload) throws JsonProcessingException {
+            ZeusMessagePayload<ProcessingValidationResult> messagePayload) throws JsonProcessingException {
         // Convert the payload as String
         String valueAsString = objectMapper.writeValueAsString(messagePayload);
         // Store the response in the detail table
@@ -116,15 +118,16 @@ public class TransactionValidationResultProducer {
      * @param payloadId
      * @param messagePayload
      */
-    private ProducerRecord<String, ZeusMessagePayload<TransactionValidationResult>> buildProducerRecord(
+    private ProducerRecord<String, ZeusMessagePayload<ProcessingValidationResult>> buildProducerRecord(
             String payloadId,
-            ZeusMessagePayload<TransactionValidationResult> messagePayload){
-        RecordHeader messageHeader = new RecordHeader("payload-id",
-                "test payload id".getBytes());
-        return new ProducerRecord<>("ZEUS.VALIDATOR.TRANSACTION.RESP",
+            ZeusMessagePayload<ProcessingValidationResult> messagePayload){
+        RecordHeader messageHeader = new RecordHeader("Processing payload response id",
+                "Processing payload response id".getBytes());
+        return new ProducerRecord<>("ZEUS.VALIDATOR.PROCESSING.RESP",
                 null,
                 payloadId,
                 messagePayload,
                 Arrays.asList(messageHeader));
     }
+
 }

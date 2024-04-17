@@ -70,7 +70,8 @@ public class EndDatePresenceRule implements TransactionRule {
                             .ruleName(rule.getRuleName())
                             .ruleMessages(new ArrayList<RuleMessage>())
                             .build();
-                    if(memberDto.getEndDate() == null){
+                    // Note for a cancel term transaction the end date is the effective date
+                    if(memberDto.getEffectiveDate() == null){
                         endDatePresenceRule.getRuleMessages()
                                 .add(RuleMessage.builder()
                                         .messageDescription("End Date not present for the member")

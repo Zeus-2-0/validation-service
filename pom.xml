@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.brihaspathee.zeus</groupId>
 	<artifactId>validation-service</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<name>Validation Service</name>
 	<description>Validation Service</description>
 	<properties>
@@ -30,7 +30,7 @@
 		<!--        <developerConnection>scm:git:ssh://github.com:Zeus-2-0/validation-service.git</developerConnection>-->
 		<developerConnection>scm:git:git@github.com:Zeus-2-0/validation-service.git</developerConnection>
 		<url>scm:git:http://github.com/Zeus-2-0/validation-service</url>
-		<tag>1.0.0</tag>
+		<tag>validation-service-1.0.3</tag>
 	</scm>
 
 	<developers>

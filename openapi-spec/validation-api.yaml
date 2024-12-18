@@ -18,7 +18,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WelcomeDto'
+                $ref: "#/components/schemas/WelcomeDto"
   /api/v1/zeus/validation/delete:
     delete:
       tags:
@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ZeusApiResponse'
+                $ref: "#/components/schemas/ZeusApiResponse"
 components:
   schemas:
     WelcomeDto:
